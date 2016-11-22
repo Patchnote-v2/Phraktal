@@ -93,7 +93,7 @@ bool Quadtree<T>::insert(T* item)
     std::cout << "Inserting" << std::endl;
     if (this->belongs(item))
     {
-        // IF IS NOT IN QUAD
+        // IF IS IN QUAD ALREADY
         for (T* vectorItem : this->items)
         {
             if (vectorItem == item)
@@ -127,14 +127,15 @@ bool Quadtree<T>::insert(T* item)
                     return false;
                 }
             }
+            bool inserted = false;
             for (Quadtree* quad : this->quads)
             {
                 if (quad->insert(item))
                 {
-                    return true;
+                    inserted = true;
                 }
             }
-            return false;
+            return inserted;
         }
         // IF ISN'T AS DEEP AS CAN GO AND CANNOT HOLD MORE AND IS A LEAF
         else
@@ -167,10 +168,6 @@ template <typename T>
 void Quadtree<T>::update()
 {
 //    std::cout << "Update: " << this->level << std::endl;
-    if (this->getCount() > MAX_ITEMS)
-    {
-
-    }
     if (this->quads[0] == nullptr && this->items.empty())
     {
         this->clear();
@@ -185,7 +182,7 @@ void Quadtree<T>::update()
             temp = item;
             if (this->remove(item))
             {
-                this->parent->insert(temp);
+                this->root->insert(temp);
             }
         }
     }
@@ -213,6 +210,10 @@ bool Quadtree<T>::remove(T* item)
                 }
             }
             this->items.erase(this->items.begin() + i);
+            if (this->items.empty())
+            {
+                this->clear();
+            }
             return true;
         }
     }
