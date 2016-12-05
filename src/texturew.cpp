@@ -2,9 +2,7 @@
 
 TextureW::TextureW()
 {
-    this->renderer = nullptr;
-    this->font = nullptr;
-    this->texture = nullptr;
+    this->renderer.reset();
     this->tW = 0;
     this->tH = 0;
 }
@@ -13,19 +11,19 @@ TextureW::~TextureW()
     this->renderer = nullptr;
     if (this->font != nullptr)
     {
-        TTF_CloseFont(this->font);
+        TTF_CloseFont(this->font.get());
         this->font = nullptr;
     }
     if (this->texture != nullptr)
     {
-        SDL_DestroyTexture(this->texture);
+        SDL_DestroyTexture(this->texture.get());
         this->texture = nullptr;
         this->tW = 0;
         this->tH = 0;
     }
 }
 
-bool TextureW::setRenderer(SDL_Renderer* ren)
+bool TextureW::setRenderer(std::shared_ptr< SDL_Renderer > ren)
 {
     if (ren == nullptr && this->isRendererSet())
     {
@@ -44,7 +42,7 @@ bool TextureW::isRendererSet()
     return !(this->renderer == nullptr);
 }
 
-SDL_Renderer* TextureW::getRenderer()
+std::shared_ptr< SDL_Renderer > TextureW::getRenderer()
 {
     if (this->isRendererSet())
     {
@@ -82,7 +80,7 @@ bool TextureW::loadTexture(std::string filePath)
     else
     {
         this->clearTexture();
-        this->texture = SDL_CreateTextureFromSurface(this->renderer, surface);
+        this->texture.reset(SDL_CreateTextureFromSurface(this->renderer.get(), surface));
         if (this->texture == nullptr)
         {
             Log::logSDLError(std::cout, "Unable to create texture from surface");
@@ -104,11 +102,11 @@ bool TextureW::loadTextureFromText(std::string text, SDL_Color color, int wrappe
     SDL_Surface* surface;
     if (wrapped != 0)
     {
-        surface = TTF_RenderText_Blended_Wrapped(this->font, text.c_str(), color, wrapped);
+        surface = TTF_RenderText_Blended_Wrapped(this->font.get(), text.c_str(), color, wrapped);
     }
     else
     {
-        surface = TTF_RenderText_Solid(this->font, text.c_str(), color);
+        surface = TTF_RenderText_Solid(this->font.get(), text.c_str(), color);
     }
 
     if (surface == nullptr)
@@ -120,7 +118,7 @@ bool TextureW::loadTextureFromText(std::string text, SDL_Color color, int wrappe
     else
     {
         this->clearTexture();
-        this->texture = SDL_CreateTextureFromSurface(this->renderer, surface);
+        this->texture.reset(SDL_CreateTextureFromSurface(this->renderer.get(), surface));
         if (this->texture == nullptr)
         {
             Log::logSDLError(std::cout, "Unable to create texture from text");
@@ -141,7 +139,7 @@ void TextureW::clearTexture()
 {
     if (this->texture != nullptr)
     {
-        SDL_DestroyTexture(this->texture);
+        SDL_DestroyTexture(this->texture.get());
         this->texture = nullptr;
         this->tW = 0;
         this->tH = 0;
@@ -163,7 +161,7 @@ bool TextureW::setFont(std::string fontFile, int fontSize)
     if (!this->isFontSet())
     {
         this->clearFont();
-        this->font = TTF_OpenFont(fontFile.c_str(), fontSize);
+        this->font.reset(TTF_OpenFont(fontFile.c_str(), fontSize));
         return this->font != nullptr;
     }
     else
@@ -181,13 +179,14 @@ void TextureW::clearFont()
 {
     if (this->isFontSet())
     {
-        TTF_CloseFont(this->font);
+        TTF_CloseFont(this->font.get());
         this->font = nullptr;
     }
 }
 
 // x, y, clip, angle, center, flip
-void TextureW::renderTexture(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip)
+void TextureW::renderTexture(int x, int y, std::unique_ptr< SDL_Rect > clip, double angle,
+                             std::unique_ptr< SDL_Point > center, SDL_RendererFlip flip)
 {
     SDL_Rect destination = {x, y, tW, tH};
 
@@ -197,5 +196,5 @@ void TextureW::renderTexture(int x, int y, SDL_Rect* clip, double angle, SDL_Poi
         destination.h = clip->h;
     }
 
-    SDL_RenderCopyEx(this->renderer, this->texture, clip, &destination, angle, center, flip);
+    SDL_RenderCopyEx(this->renderer.get(), this->texture.get(), clip.get(), &destination, angle, center.get(), flip);
 }

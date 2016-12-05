@@ -4,10 +4,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cfloat>
+#include <memory>
 
 #include "SDL2/SDL.h"
 #include "texturew.h"
 #include "vector2.h"
+#include "utils.h"
 
 enum class Type {PLAYER, ENEMY};
 
@@ -16,40 +18,21 @@ class Mimic
 public:
     Mimic();
     ~Mimic() {};
-    bool almostEqual(float A, float B, float maxDiff, float maxRelDiff = FLT_EPSILON)
-    {
-        // Check if the numbers are really close -- needed
-        // when comparing numbers near zero.
-        float diff = fabs(A - B);
-        if (diff <= maxDiff)
-            return true;
-
-        A = fabs(A);
-        B = fabs(B);
-        float largest = (B > A) ? B : A;
-
-        if (diff <= largest * maxRelDiff)
-        {
-            return true;
-        }
-
-        return false;
-    }
 
     virtual void setTexture(std::string name);
-    void setRenderer(SDL_Renderer* renderer);
-    SDL_Rect* getRect();
-    Vector2* getOldPos();
-    Vector2* getPos();
+    void setRenderer(std::shared_ptr< SDL_Renderer > renderer);
+    std::unique_ptr< SDL_Rect > getRect();
+    std::shared_ptr< Vector2 > getOldPos();
+    std::shared_ptr< Vector2 > getPos();
     bool hasMoved();
-    virtual bool checkCollision(Mimic* m);
+    virtual bool checkCollision(std::shared_ptr< Mimic > m2);
 
     virtual void handleEvents(SDL_Event&) {};
     virtual void update(float);
     virtual void render();
 
 protected:
-    TextureW* texture;
+    std::unique_ptr< TextureW > texture;
     Vector2 oldPos;
     Vector2 pos;
     Vector2 center;

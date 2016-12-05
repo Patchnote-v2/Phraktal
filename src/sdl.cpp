@@ -6,18 +6,21 @@
 #include <map>
 #include <limits>
 #include <cfloat>
+#include <memory>
 
 #include "SDL2/SDL.h"
 #include "SDL_image.h"
 #include "SDL_ttf.h"
 
+// Data structures and utilities
 #include "log.h"
-#include "cleanup.h"
 #include "texturew.h"
 #include "timer.h"
 #include "vector2.h"
 #include "quadtree.h"
+#include "utils.h"
 
+// Game objects
 #include "mimic.h"
 #include "player.h"
 #include "enemy.h"
@@ -69,7 +72,10 @@ int main()
         return 1;
     }
 
-    SDL_Window* win = SDL_CreateWindow("TopDown", 100, 100, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+//    std::unique_ptr<int, phraktal::utils::SDL_Deleter> test(new int(1), phraktal::utils::SDL_Deleter());
+
+    phraktal::utils::SDL_Deleter d;
+    std::unique_ptr< SDL_Window, phraktal::utils::SDL_Deleter > win(SDL_CreateWindow("TopDown", 100, 100, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN), d);
     if (win == nullptr)
     {
         Log::logSDLError(std::cout, "CreateWindow");
@@ -78,11 +84,10 @@ int main()
     }
 
     // Renderer
-    SDL_Renderer* renderer = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);// | SDL_RENDERER_PRESENTVSYNC);
+    std::shared_ptr< SDL_Renderer > renderer(SDL_CreateRenderer(win.get(), -1, SDL_RENDERER_ACCELERATED), d);// | SDL_RENDERER_PRESENTVSYNC);
     if (renderer == nullptr)
     {
         Log::logSDLError(std::cout, "CreateRenderer");
-        cleanup(win);
         SDL_Quit();
         return 1;
     }
@@ -90,45 +95,37 @@ int main()
 
     // Stats
     std::stringstream timeText;
-    TextureW* fpsCounter = new TextureW();
+    std::unique_ptr<TextureW> fpsCounter(new TextureW());
     fpsCounter->setRenderer(renderer);
     fpsCounter->setFont("assets/sample.ttf", 16);
 
     std::stringstream statsText;
-    TextureW* stats = new TextureW();
+    std::unique_ptr<TextureW> stats(new TextureW());
     stats->setRenderer(renderer);
     stats->setFont("assets/sample.ttf", 16);
 
     // Textures
-    std::map< std::string, TextureW* > images;
+    std::map< std::string, std::unique_ptr<TextureW> > images;
     SDL_Color color = { 255, 255, 255, 255};
 
     // Texture map
-    images.insert(std::map< std::string, TextureW* >::value_type("fpsCounter", fpsCounter));
-    images.insert(std::map< std::string, TextureW* >::value_type("stats", stats));
-
-    for (auto image : images)
-    {
-        if (image.second == nullptr)
-        {
-            cleanup(renderer, win);
-            quitSDL();
-        }
-    }
+    images.insert(std::map< std::string, std::unique_ptr<TextureW> >::value_type("fpsCounter", std::move(fpsCounter)));
+    images.insert(std::map< std::string, std::unique_ptr<TextureW> >::value_type("stats", std::move(stats)));
 
     // Collision detection
-    SDL_Rect windowBoundary = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
-    Quadtree<Mimic> quadtree(&windowBoundary, 0, nullptr, nullptr);
+    std::unique_ptr< SDL_Rect > windowBoundary(new SDL_Rect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT});
+    std::shared_ptr< Quadtree<Mimic> > quadtree(new Quadtree<Mimic>(std::move(windowBoundary), 0));
+    quadtree->start();
 
     // Timers
-    Timer* fpsTimer = new Timer();
+    std::unique_ptr<Timer> fpsTimer(new Timer());
     int countedFrames = 0;
     float averageFPS = 0.f;
     fpsTimer->start();
 
-    Timer* capTimer = new Timer();
+    std::unique_ptr<Timer> capTimer(new Timer());
 
-    Timer* deltaTimer = new Timer();
+    std::unique_ptr<Timer> deltaTimer(new Timer());
     deltaTimer->start();
 
     // Keystates
@@ -136,21 +133,15 @@ int main()
 
     // Mimics
 
-    std::vector< Mimic* > mimics;
-    Player* player = new Player();
+    std::vector< std::shared_ptr< Mimic > > mimics;
+    std::shared_ptr<Player> player(new Player());
     player->setRenderer(renderer);
     player->setTexture(PLAYER_PNG);
     player->setPos(538, 250);
     mimics.push_back(player);
-    quadtree.insert(player);
+    quadtree->insert(player);
 
     /*
-    Enemy* enemy = new Enemy();
-    enemy->setRenderer(renderer);
-    enemy->setTexture(ENEMY_PNG);
-    enemy->setPos(500, 500);
-    quadtree.insert(enemy);
-
     Enemy* enemy2 = new Enemy();
     enemy2->setRenderer(renderer);
     enemy2->setTexture(ENEMY_PNG);
@@ -198,12 +189,12 @@ int main()
                 {
                     int x, y;
                     SDL_GetMouseState(&x, &y);
-                    Enemy* enemy = new Enemy();
+                    std::shared_ptr< Enemy > enemy(new Enemy());
                     enemy->setRenderer(renderer);
                     enemy->setTexture(ENEMY_PNG);
                     enemy->setPos(x, y);
                     mimics.push_back(enemy);
-                    quadtree.insert(enemy);
+                    quadtree->insert(enemy);
                 }
             }
             if (e.type == SDL_KEYUP)
@@ -236,21 +227,22 @@ int main()
         {
             mimic->update(dTime);
         }
-        quadtree.update();
+        quadtree->update();
         deltaTimer->start();
 
+
         // Render textures
-        SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
-        SDL_RenderClear(renderer);
+        SDL_SetRenderDrawColor(renderer.get(), 0x00, 0x00, 0x00, 0xFF);
+        SDL_RenderClear(renderer.get());
         images["fpsCounter"]->renderTexture(10, 10);
         images["stats"]->renderTexture(10, images["fpsCounter"]->getHeight() + 20);
         for (auto mimic : mimics)
         {
             mimic->render();
         }
-        SDL_SetRenderDrawColor(renderer, 0xAA, 0xAA, 0xAA, 0xAA);
-        quadtree.render(renderer);
-        SDL_RenderPresent(renderer);
+        SDL_SetRenderDrawColor(renderer.get(), 0xAA, 0xAA, 0xAA, 0xAA);
+        quadtree->render(renderer);
+        SDL_RenderPresent(renderer.get());
 
         // FPS
         countedFrames++;
@@ -261,10 +253,9 @@ int main()
         }
     }
 
-    for (auto image : images)
-    {
-        image.second->clearTexture();
-    }
-    cleanup(renderer, win);
+//    for (auto image : images)
+//    {
+//        image.second->clearTexture();
+//    }
     quitSDL();
 }

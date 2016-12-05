@@ -8,6 +8,6 @@ file(GLOB allFiles
         "*.cpp"
         )
 
-add_executable(src ${allFiles})
+add_executable(src ${allFiles} ../include/utils.h)
 target_link_libraries(src ${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARY} ${SDL2_TTF_LIBRARY})
 install(TARGETS src RUNTIME DESTINATION ${BIN_DIR})

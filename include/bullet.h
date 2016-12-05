@@ -2,6 +2,7 @@
 #define BULLET_H
 
 #include "mimic.h"
+#include <memory>
 
 #define PI 3.14159265
 

@@ -3,21 +3,23 @@
 
 #include <stdlib.h>
 #include <iostream>
+#include <memory>
 
 #include "SDL2/SDL.h"
 #include "SDL_image.h"
 #include "SDL_ttf.h"
 
 #include "log.h"
+#include "utils.h"
 
 class TextureW
 {
 public:
     TextureW();
     ~TextureW();
-    bool setRenderer(SDL_Renderer* ren);
+    bool setRenderer(std::shared_ptr< SDL_Renderer > ren);
     bool isRendererSet();
-    SDL_Renderer* getRenderer();
+    std::shared_ptr< SDL_Renderer > getRenderer();
     void clearRenderer();
     bool loadTexture(std::string filePath);
     bool loadTextureFromText(std::string text, SDL_Color color, int wrapped = 0);
@@ -28,12 +30,14 @@ public:
     bool isFontSet();
     void clearFont();
     void setFontColor(SDL_Color  color);
-    void renderTexture(int x, int y, SDL_Rect* clip = NULL, double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE); 
+    void renderTexture(int x, int y, std::unique_ptr< SDL_Rect > clip = NULL, double angle = 0.0,
+                       std::unique_ptr< SDL_Point > center = NULL,
+                       SDL_RendererFlip flip = SDL_FLIP_NONE);
 
 private:
-    SDL_Renderer* renderer;
-    TTF_Font* font;
-    SDL_Texture* texture;
+    std::shared_ptr< SDL_Renderer > renderer;
+    std::unique_ptr< TTF_Font, phraktal::utils::SDL_Deleter > font;
+    std::unique_ptr< SDL_Texture, phraktal::utils::SDL_Deleter > texture;
     int tW;
     int tH;
 };

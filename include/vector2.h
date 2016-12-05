@@ -84,9 +84,11 @@ inline bool operator !=(Vector2 left, Vector2 right)
 }
 
 // Modified SDL_PointInRect()
+/*
 inline bool Vector2InRect(const Vector2* p, const SDL_Rect* r)
 {
     return ( ((int) p->x >= r->x) && ((int) p->x < (r->x + r->w)) &&
              ((int) p->y >= r->y) && ((int) p->y < (r->y + r->h)) ) ? true : false;
 }
+*/
 #endif

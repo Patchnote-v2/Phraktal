@@ -121,11 +121,11 @@ void Player::update(float dTime)
     }
 
     // Update old position, position
-    if (!almostEqual(this->pos.x, this->oldPos.x, FLT_EPSILON * 50000000))
+    if (!phraktal::utils::almostEqual(this->pos.x, this->oldPos.x, FLT_EPSILON * 50000000))
     {
         this->oldPos.x = this->pos.x;
     }
-    if (!almostEqual(this->pos.y, this->oldPos.y, FLT_EPSILON * 50000000))
+    if (!phraktal::utils::almostEqual(this->pos.y, this->oldPos.y, FLT_EPSILON * 50000000))
     {
         this->oldPos.y = this->pos.y;
     }

@@ -1,55 +1,60 @@
 #ifndef QUADTREE_H
 #define QUADTREE_H
 
+#include "SDL2/SDL.h"
+
 #include <vector>
+#include <algorithm>
+#include <memory>
 #include "vector2.h"
 #include "mimic.h"
 #include "texturew.h"
 
 template <typename T>
-class Quadtree
+class Quadtree : public std::enable_shared_from_this<Quadtree<T>>
 {
      static const int MAX_LEVEL = 3;
 
 public:
-    SDL_Rect* boundary;
+    std::unique_ptr< SDL_Rect > boundary;
     int level;
-    std::vector< Quadtree* > quads;
+    std::vector< std::shared_ptr< Quadtree<T> > > quads;
 
-    std::vector< T* > items;
+    std::vector< std::shared_ptr<T> > items;
 
-    Quadtree(SDL_Rect* boundary, int level, Quadtree* root, Quadtree* parent);
+    Quadtree(std::unique_ptr< SDL_Rect > boundary, int level);
 
-    std::vector< T*> clear();
-    bool insert(T* item);
+    void start();
+    void start(std::weak_ptr< Quadtree<T> > root,
+               std::weak_ptr< Quadtree<T> > parent);
+    void clear();
+    bool insert(std::shared_ptr< T > item);
     void update();
-    bool remove(T* item);
-    void render(SDL_Renderer* renderer);
-    std::vector< T* > queryArea(SDL_Rect* area);
+    bool remove(std::shared_ptr< T > item);
+    void render(std::shared_ptr< SDL_Renderer > renderer);
+    std::vector< std::shared_ptr<T> > queryArea(SDL_Rect* area);
     bool isLeaf();
+    std::vector< std::shared_ptr<T> > getItems();
 
 private:
     static const int MAX_ITEMS = 4;
-    Quadtree* parent;
-    Quadtree* root;
+    std::weak_ptr< Quadtree<T> > parent;
+    std::weak_ptr< Quadtree<T> > root;
 
     TextureW* count;
 
-    void subdivide();
-    bool belongs(T* item);
+    void divide();
+    void undivide();
+    bool belongs(std::shared_ptr< T > item);
     int getCount();
+    bool isEmpty();
 };
 
 template <typename T>
-Quadtree<T>::Quadtree(SDL_Rect* boundary, int level, Quadtree* root, Quadtree* parent)// : boundary(boundary)
+Quadtree<T>::Quadtree(std::unique_ptr< SDL_Rect > boundary,
+                      int level)
 {
-    for (int i = 0; i < 4; i++)
-    {
-        this->quads.push_back(nullptr);
-    }
-    this->boundary = boundary;
-    this->root = root == nullptr ? this : root;
-    this->parent = parent == nullptr ? this : root;
+    this->boundary = std::move(boundary);
     this->level = level;
 
     this->count = new TextureW();
@@ -60,23 +65,33 @@ Quadtree<T>::Quadtree(SDL_Rect* boundary, int level, Quadtree* root, Quadtree* p
 //    this->southEast = nullptr;
 }
 
-template <typename T>
-std::vector< T* > Quadtree<T>::clear()
+template  <typename T>
+void Quadtree<T>::start()
 {
-    if (this->quads[0] != nullptr)
+    this->root = this->shared_from_this();
+}
+
+template <typename T>
+void Quadtree<T>::start(std::weak_ptr< Quadtree > root, std::weak_ptr< Quadtree > parent)
+{
+    this->root = root;
+    this->parent = parent;
+}
+
+template <typename T>
+void Quadtree<T>::clear()
+{
+    if (!this->isLeaf())
     {
-        for (Quadtree* quad : quads)
+        for (auto quad : quads)
         {
             quad->clear();
         }
     }
-    for (int i = 0; i < this->items.size(); i ++)
-    {
-        this->items[i] = nullptr;
-    }
-    std::vector< T* > temp = this->items;
-    temp.clear();
-    return this->items;
+    this->quads.clear();
+    this->quads.shrink_to_fit();
+    this->items.clear();
+    this->items.shrink_to_fit();
 //    northWest->clear();
 //    northWest = nullptr;
 //    northEast->clear();
@@ -88,17 +103,17 @@ std::vector< T* > Quadtree<T>::clear()
 }
 
 template <typename T>
-bool Quadtree<T>::insert(T* item)
+bool Quadtree<T>::insert(std::shared_ptr< T > item)
 {
-    std::cout << "Inserting" << std::endl;
+    std::cout << "Inserting: " << item << std::endl;
     if (this->belongs(item))
     {
+        std::cout << "Belongs: " << item << std::endl;
         // IF IS IN QUAD ALREADY
-        for (T* vectorItem : this->items)
+        for (auto vectorItem : this->items)
         {
             if (vectorItem == item)
             {
-                std::cout << "Already in quad" << std::endl;
                 return false;
             }
         }
@@ -106,21 +121,19 @@ bool Quadtree<T>::insert(T* item)
         // IF IS AS DEEP AS CAN GO
         if (this->level == this->MAX_LEVEL)
         {
-            std::cout << "Item belongs MAX LEVEL" << std::endl;
             this->items.push_back(item);
             return true;
         }
         // IF IS LEAF AND CAN HOLD MORE
-        else if (this->quads[0] == nullptr && this->items.size() < MAX_ITEMS)
+        else if (this->isLeaf() && this->items.size() < MAX_ITEMS)
         {
-            std::cout << "Item belongs/is leaf" << std::endl;
             this->items.push_back(item);
             return true;
         }
         // IF IS NOT LEAF
-        else if (this->quads[0] != nullptr)
+        else if (!this->isLeaf())
         {
-            for (T* i : this->items)
+            for (auto i : this->items)
             {
                 if (item == i)
                 {
@@ -128,7 +141,7 @@ bool Quadtree<T>::insert(T* item)
                 }
             }
             bool inserted = false;
-            for (Quadtree* quad : this->quads)
+            for (auto quad : this->quads)
             {
                 if (quad->insert(item))
                 {
@@ -141,20 +154,21 @@ bool Quadtree<T>::insert(T* item)
         else
         {
             std::cout << "Too many items" << std::endl;
-            this->subdivide();
+            this->divide();
 
             // Reinsert
-            for (Quadtree* quad : this->quads)
+            for (auto quad : this->quads)
             {
                 // New item
                 quad->insert(item);
-                for (T* itemVector : this->items)
+                for (auto itemVector : this->items)
                 {
                     // Current items
                     quad->insert(itemVector);
                 }
             }
             this->items.clear();
+            this->items.shrink_to_fit();
             return true;
         }
     }
@@ -167,53 +181,57 @@ bool Quadtree<T>::insert(T* item)
 template <typename T>
 void Quadtree<T>::update()
 {
-//    std::cout << "Update: " << this->level << std::endl;
-    if (this->quads[0] == nullptr && this->items.empty())
+    // If is leaf and is empty
+    if (isEmpty())
     {
         this->clear();
         return;
     }
-    T* temp;
-    for (T* item : this->items)
+
+    // If any items have moved
+    std::shared_ptr< T > temp;
+    for (auto item : this->items)
     {
         if (item->hasMoved())
         {
-            std::cout << &item << " has moved." << std::endl;
+            std::cout << item << " has moved." << std::endl;
             temp = item;
             if (this->remove(item))
             {
-                this->root->insert(temp);
+                this->root.lock()->insert(temp);
             }
         }
     }
-    if (this->quads[0] != nullptr)
+
+    // Update subnodes
+    if (!this->isLeaf())
     {
-        for (Quadtree* quad : quads)
+        for (auto quad : quads)
         {
             quad->update();
+        }
+        if (this->getCount() < MAX_ITEMS)
+        {
+            this->undivide();
         }
     }
 }
 
 template <typename T>
-bool Quadtree<T>::remove(T* item)
+bool Quadtree<T>::remove(std::shared_ptr< T > item)
 {
-    for (int i = 0; i < this->items.size(); i++)
+    for (unsigned int i = 0; i < this->items.size(); i++)
     {
         if (this->items[i] == item)
         {
-            if (this->quads[0] != nullptr)
+            if (!this->isLeaf())
             {
-                for (Quadtree* quad : this->quads)
+                for (auto quad : this->quads)
                 {
                     quad->remove(this->items[i]);
                 }
             }
             this->items.erase(this->items.begin() + i);
-            if (this->items.empty())
-            {
-                this->clear();
-            }
             return true;
         }
     }
@@ -221,74 +239,136 @@ bool Quadtree<T>::remove(T* item)
 }
 
 template <typename T>
-void Quadtree<T>::render(SDL_Renderer* renderer)
+void Quadtree<T>::render(std::shared_ptr< SDL_Renderer > renderer)
 {
     SDL_Color color = {0xFF, 0xFF, 0xFF, 0xFF};
     std::stringstream numItemsText;
     this->count->setRenderer(renderer);
 
-    numItemsText << this->items.size();
-    this->count->loadTextureFromText(numItemsText.str().c_str(), color);
-    this->count->renderTexture(this->boundary->x + (this->level * 5), this->boundary->y + (this->level * 5));
-    SDL_RenderDrawRect(renderer, this->boundary);
-    if (this->quads[0] != nullptr)
+    SDL_RenderDrawRect(renderer.get(), this->boundary.get());
+    if (!this->isLeaf())
     {
-        for (int i = 0; i < this->quads.size(); i++)
+        for (unsigned int i = 0; i < this->quads.size(); i++)
         {
             this->quads[i]->render(renderer);
         }
     }
+    else
+    {
+        numItemsText << this->getCount();
+        this->count->loadTextureFromText(numItemsText.str().c_str(), color);
+        this->count->renderTexture(this->boundary->x + (this->level * 5), this->boundary->y + (this->level * 5));
+    }
 }
 
 template <typename T>
-void Quadtree<T>::subdivide()
+void Quadtree<T>::divide()
 {
     int childWidth = this->boundary->w / 2;
     int childHeight = this->boundary->h / 2;
 
-    SDL_Rect* northWestBoundary = new SDL_Rect();
+    std::unique_ptr< SDL_Rect > northWestBoundary(new SDL_Rect{});
     northWestBoundary->x = this->boundary->x;
     northWestBoundary->y = this->boundary->y;
     northWestBoundary->w = childWidth;
     northWestBoundary->h = childHeight;
 
-    SDL_Rect* northEastBoundary = new SDL_Rect();
+    std::unique_ptr< SDL_Rect > northEastBoundary(new SDL_Rect{});
     northEastBoundary->x = this->boundary->x + childWidth;
     northEastBoundary->y = this->boundary->y;
     northEastBoundary->w = childWidth;
     northEastBoundary->h = childHeight;
 
-    SDL_Rect* southWestBoundary = new SDL_Rect();
+    std::unique_ptr< SDL_Rect > southWestBoundary(new SDL_Rect{});
     southWestBoundary->x = this->boundary->x;
     southWestBoundary->y = this->boundary->y + childHeight;
     southWestBoundary->w = childWidth;
     southWestBoundary->h = childHeight;
 
-    SDL_Rect* southEastBoundary = new SDL_Rect();
+    std::unique_ptr< SDL_Rect > southEastBoundary(new SDL_Rect{});
     southEastBoundary->x = this->boundary->x + childWidth;
     southEastBoundary->y = this->boundary->y + childHeight;
     southEastBoundary->w = childWidth;
     southEastBoundary->h = childHeight;
 
-    this->quads[0] = new Quadtree(northWestBoundary, this->level + 1, this->root, this);
-    this->quads[1] = new Quadtree(northEastBoundary, this->level + 1, this->root, this);
-    this->quads[2] = new Quadtree(southWestBoundary, this->level + 1, this->root, this);
-    this->quads[3] = new Quadtree(southEastBoundary, this->level + 1, this->root, this);
+    this->quads.push_back
+            (std::make_shared<Quadtree<T>>
+                     (std::move(northWestBoundary),
+                      this->level + 1)
+            );
+    this->quads.push_back
+            (std::make_shared<Quadtree<T>>
+                     (std::move(northEastBoundary),
+                      this->level + 1)
+            );
+    this->quads.push_back
+            (std::make_shared<Quadtree<T>>
+                     (std::move(southWestBoundary),
+                      this->level + 1)
+            );
+    this->quads.push_back
+            (std::make_shared<Quadtree<T>>
+                     (std::move(southEastBoundary),
+                      this->level + 1)
+            );
+    for (auto quad : this->quads)
+    {
+        quad->start(this->root.lock(), std::weak_ptr<Quadtree<T> >(this->shared_from_this()));
+    }
 }
 
 template <typename T>
-bool Quadtree<T>::belongs(T* item)
+void Quadtree<T>::undivide()
 {
-    return SDL_HasIntersection(item->getRect(), this->boundary);
+    std::vector< std::shared_ptr<T> > temp;
+    std::vector< std::shared_ptr<T> > allItems;
+
+    for (auto quad : this->quads)
+    {
+        temp = getItems();
+        allItems.insert(allItems.end(), temp.begin(), temp.end());
+        this->quads.clear();
+        this->quads.shrink_to_fit();
+    }
+    for (auto item : allItems)
+    {
+        this->insert(item);
+    }
+}
+
+template <typename T>
+bool Quadtree<T>::belongs(std::shared_ptr< T > item)
+{
+    return SDL_HasIntersection(item->getRect().get(), this->boundary.get());
+}
+
+template <typename T>
+std::vector< std::shared_ptr<T> > Quadtree<T>::getItems()
+{
+    std::vector< std::shared_ptr<T> > temp;
+    std::vector< std::shared_ptr<T> > allItems;
+    if (!this->isLeaf())
+    {
+        for (auto quad : this->quads)
+        {
+            temp = quad->getItems();
+            allItems.insert(allItems.end(), temp.begin(), temp.end());
+        }
+        return allItems;
+    }
+    else
+    {
+        return this->items;
+    }
 }
 
 template <typename T>
 int Quadtree<T>::getCount()
 {
-    int total;
-    if (this->quads[0] != nullptr)
+    int total = 0;
+    if (!this->isLeaf())
     {
-        for (Quadtree* quad : this->quads)
+        for (auto quad : this->quads)
         {
             total += quad->getCount();
         }
@@ -296,14 +376,27 @@ int Quadtree<T>::getCount()
     }
     else
     {
-        return this->items.size();
+        return (int) this->items.size();
     }
 }
 
 template <typename T>
 bool Quadtree<T>::isLeaf()
 {
-    return this->quads[0] == nullptr;
+    return this->quads.empty();
+}
+
+template <typename T>
+bool Quadtree<T>::isEmpty()
+{
+    if (this->items.empty())
+    {
+        return this->isLeaf();
+    }
+    else
+    {
+        return false;
+    }
 }
 
 #endif

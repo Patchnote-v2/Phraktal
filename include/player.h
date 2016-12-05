@@ -10,7 +10,6 @@
 #define PI 3.14159265
 
 const int MAX_SPEED = 10;
-const int EPSILON = 1;
 
 const std::string PLAYER_PNG = "assets/player.png";
 
