@@ -8,8 +8,7 @@ Developed on Linux.  Once it's more of an actual "game" and less of an experimen
 Current features being added (more or less in order):
 - Finish grid-based proximity detection for more effection collision detection 
 - Enemy spawning and direct-line "pathfinding"
-- Moving camera/level
-- Making a level/figuring out multiple levels
+- Level loading and dealing with multiple levels
 
 ##### Controls:
 If you do manage to get this to run, as of writing the controls are:
