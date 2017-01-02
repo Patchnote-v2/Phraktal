@@ -7,6 +7,7 @@
 #include <limits>
 #include <cfloat>
 #include <memory>
+#include <level.h>
 
 #include "SDL2/SDL.h"
 #include "SDL_image.h"
@@ -17,20 +18,14 @@
 #include "texturew.h"
 #include "timer.h"
 #include "vector2.h"
-#include "quadtree.h"
 #include "utils.h"
 
 // Game objects
 #include "mimic.h"
+#include "camera.h"
 #include "player.h"
 #include "enemy.h"
 
-const int SCREEN_FPS = 60;
-const int SCREEN_TICKS_PER_FRAME = 1000 / SCREEN_FPS;
-
-const int SCREEN_WIDTH = 1080;
-const int SCREEN_HEIGHT = 720;
-const int SQUARE_SIZE = 100;
 
 int init()
 {
@@ -75,7 +70,7 @@ int main()
 //    std::unique_ptr<int, phraktal::utils::SDL_Deleter> test(new int(1), phraktal::utils::SDL_Deleter());
 
     phraktal::utils::SDL_Deleter d;
-    std::unique_ptr< SDL_Window, phraktal::utils::SDL_Deleter > win(SDL_CreateWindow("TopDown", 100, 100, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN), d);
+    std::unique_ptr< SDL_Window, phraktal::utils::SDL_Deleter > win(SDL_CreateWindow("TopDown", 100, 100, phraktal::levels::SCREEN_WIDTH, phraktal::levels::SCREEN_HEIGHT, SDL_WINDOW_SHOWN), d);
     if (win == nullptr)
     {
         Log::logSDLError(std::cout, "CreateWindow");
@@ -97,25 +92,29 @@ int main()
     std::stringstream timeText;
     std::unique_ptr<TextureW> fpsCounter(new TextureW());
     fpsCounter->setRenderer(renderer);
-    fpsCounter->setFont("assets/sample.ttf", 16);
+    fpsCounter->setFont(phraktal::assets::DEFAULT_FONT, 16);
 
     std::stringstream statsText;
     std::unique_ptr<TextureW> stats(new TextureW());
     stats->setRenderer(renderer);
-    stats->setFont("assets/sample.ttf", 16);
+    stats->setFont(phraktal::assets::DEFAULT_FONT, 16);
 
     // Textures
     std::map< std::string, std::unique_ptr<TextureW> > images;
     SDL_Color color = { 255, 255, 255, 255};
 
+    std::unique_ptr< TextureW > bg(new TextureW());
+    bg->setRenderer(renderer);
+    bg->loadTexture(phraktal::assets::BG_PNG);
+
     // Texture map
-    images.insert(std::map< std::string, std::unique_ptr<TextureW> >::value_type("fpsCounter", std::move(fpsCounter)));
-    images.insert(std::map< std::string, std::unique_ptr<TextureW> >::value_type("stats", std::move(stats)));
+    images.insert(std::map< std::string, std::unique_ptr< TextureW > >::value_type("fpsCounter", std::move(fpsCounter)));
+    images.insert(std::map< std::string, std::unique_ptr< TextureW > >::value_type("stats", std::move(stats)));
+    images.insert(std::map< std::string, std::unique_ptr< TextureW > >::value_type("bg", std::move(bg)));
 
     // Collision detection
-    std::unique_ptr< SDL_Rect > windowBoundary(new SDL_Rect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT});
-    std::shared_ptr< Quadtree<Mimic> > quadtree(new Quadtree<Mimic>(std::move(windowBoundary), 0));
-    quadtree->start();
+//    std::unique_ptr< SDL_Rect > windowBoundary(new SDL_Rect{0, 0, phraktal::levels::SCREEN_WIDTH, phraktal::levels::SCREEN_HEIGHT});
+
 
     // Timers
     std::unique_ptr<Timer> fpsTimer(new Timer());
@@ -131,15 +130,20 @@ int main()
     // Keystates
     const Uint8* keystates = SDL_GetKeyboardState(NULL);
 
-    // Mimics
+    // Levels
+    auto level1 = std::make_shared< Level >();
+    level1->loadFromFile("assets/levels/1.txt", renderer);
 
+    // Mimics
     std::vector< std::shared_ptr< Mimic > > mimics;
-    std::shared_ptr<Player> player(new Player());
+    auto camera = std::make_shared< Camera >(0, 0, phraktal::levels::SCREEN_WIDTH, phraktal::levels::SCREEN_HEIGHT);
+    auto player = std::make_shared< Player >(camera);
     player->setRenderer(renderer);
-    player->setTexture(PLAYER_PNG);
-    player->setPos(538, 250);
+    player->setTexture(phraktal::assets::PLAYER_PNG);
+//    player->setPos(538, 250);
+    player->setPos(550, 250);
     mimics.push_back(player);
-    quadtree->insert(player);
+    // todo: insert grid
 
     /*
     Enemy* enemy2 = new Enemy();
@@ -189,12 +193,26 @@ int main()
                 {
                     int x, y;
                     SDL_GetMouseState(&x, &y);
-                    std::shared_ptr< Enemy > enemy(new Enemy());
+                    auto enemy = std::make_shared< Enemy >(camera);
                     enemy->setRenderer(renderer);
-                    enemy->setTexture(ENEMY_PNG);
+                    enemy->setTexture(phraktal::assets::ENEMY_PNG);
                     enemy->setPos(x, y);
                     mimics.push_back(enemy);
-                    quadtree->insert(enemy);
+                    //todo insert grid
+                }
+                if (e.key.keysym.sym == SDLK_x)
+                {
+                    std::cout << mimics.size() << std::endl;
+
+                    for (unsigned int i = 1; i < mimics.size(); i++)
+                    {
+                        // todo: remove?
+                    }
+                    mimics.clear();
+                    mimics.shrink_to_fit();
+                    std::cout << mimics.size() << std::endl;
+                    mimics.push_back(player);
+                    std::cout << mimics.size() << std::endl;
                 }
             }
             if (e.type == SDL_KEYUP)
@@ -211,7 +229,7 @@ int main()
         }
         timeText.str("");
         timeText << "FPS: " << averageFPS;
-        images["fpsCounter"]->loadTextureFromText(timeText.str().c_str(), color, 100);
+        images["fpsCounter"]->loadTextureFromText(timeText.str(), color, 0);
 
         // Stats
         statsText.str("");
@@ -219,7 +237,12 @@ int main()
         statsText <<  "Y: " << player->getPos()->y << std::endl;
         statsText << "oX: " << player->getOldPos()->x << std::endl;
         statsText <<  "oY: " << player->getOldPos()->y << std::endl;
-        images["stats"]->loadTextureFromText(statsText.str().c_str(), color, 250);
+
+        statsText << "cX: " << camera->getRect()->x << std::endl;
+        statsText << "cY: " << camera->getRect()->y << std::endl;
+        statsText << "cCX: " << camera->center.x << std::endl;
+        statsText << "cCY: " << camera->center.y << std::endl;
+        images["stats"]->loadTextureFromText(statsText.str(), color, 250);
 
         // Delta time and updates
         float dTime = deltaTimer->getTicks() / 1000.f;
@@ -227,29 +250,33 @@ int main()
         {
             mimic->update(dTime);
         }
-        quadtree->update();
+
+        //todo: update grid
         deltaTimer->start();
 
+        // Camera
+        camera->update();
 
         // Render textures
         SDL_SetRenderDrawColor(renderer.get(), 0x00, 0x00, 0x00, 0xFF);
         SDL_RenderClear(renderer.get());
+        images["bg"]->renderTexture(0, 0, camera->getRect());
         images["fpsCounter"]->renderTexture(10, 10);
         images["stats"]->renderTexture(10, images["fpsCounter"]->getHeight() + 20);
+//        SDL_RenderDrawPoint(renderer.get(), (int) camera->center.x, (int) camera->center.y);
         for (auto mimic : mimics)
         {
             mimic->render();
         }
-        SDL_SetRenderDrawColor(renderer.get(), 0xAA, 0xAA, 0xAA, 0xAA);
-        quadtree->render(renderer);
+        //todo: render grid
         SDL_RenderPresent(renderer.get());
 
         // FPS
         countedFrames++;
-        int frameTicks = capTimer->getTicks();
-        if (frameTicks < SCREEN_TICKS_PER_FRAME)
+        Uint32 frameTicks = capTimer->getTicks();
+        if (frameTicks < phraktal::levels::SCREEN_TICKS_PER_FRAME)
         {
-            SDL_Delay(SCREEN_TICKS_PER_FRAME - frameTicks);
+            SDL_Delay(phraktal::levels::SCREEN_TICKS_PER_FRAME - frameTicks);
         }
     }
 

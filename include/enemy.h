@@ -7,13 +7,11 @@
 
 #include "mimic.h"
 
-const std::string ENEMY_PNG = "assets/enemy.png";
-
 class Enemy : public Mimic
 {
 public:
     Type type;
-    Enemy() : Mimic(), type(Type::ENEMY) {};
+    Enemy(std::shared_ptr< Camera > camera) : Mimic(camera), type(Type::ENEMY) {};
     void setPos(int x, int y);
 };
 #endif

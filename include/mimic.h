@@ -10,20 +10,26 @@
 #include "texturew.h"
 #include "vector2.h"
 #include "utils.h"
+#include "level.h"
+#include "camera.h"
+
+class Level;
 
 enum class Type {PLAYER, ENEMY};
 
 class Mimic
 {
 public:
-    Mimic();
+    Mimic(std::shared_ptr< Camera > camera);
     ~Mimic() {};
 
     virtual void setTexture(std::string name);
     void setRenderer(std::shared_ptr< SDL_Renderer > renderer);
+    void setLevel(std::shared_ptr< Level > level);
     std::unique_ptr< SDL_Rect > getRect();
     std::shared_ptr< Vector2 > getOldPos();
     std::shared_ptr< Vector2 > getPos();
+    std::shared_ptr< Vector2 > getCenter();
     bool hasMoved();
     virtual bool checkCollision(std::shared_ptr< Mimic > m2);
 
@@ -32,6 +38,8 @@ public:
     virtual void render();
 
 protected:
+    std::shared_ptr< Camera > camera;
+
     std::unique_ptr< TextureW > texture;
     Vector2 oldPos;
     Vector2 pos;
@@ -41,6 +49,8 @@ protected:
 
     Vector2 velocity;
     Vector2 destination;
+
+    std::shared_ptr< Level > level;
 
     Type type;
 };

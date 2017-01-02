@@ -16,7 +16,6 @@ class TextureW
 {
 public:
     TextureW();
-    ~TextureW();
     bool setRenderer(std::shared_ptr< SDL_Renderer > ren);
     bool isRendererSet();
     std::shared_ptr< SDL_Renderer > getRenderer();
@@ -30,7 +29,7 @@ public:
     bool isFontSet();
     void clearFont();
     void setFontColor(SDL_Color  color);
-    void renderTexture(int x, int y, std::unique_ptr< SDL_Rect > clip = NULL, double angle = 0.0,
+    void renderTexture(int x, int y, std::shared_ptr< SDL_Rect > clip = NULL, double angle = 0.0,
                        std::unique_ptr< SDL_Point > center = NULL,
                        SDL_RendererFlip flip = SDL_FLIP_NONE);
 

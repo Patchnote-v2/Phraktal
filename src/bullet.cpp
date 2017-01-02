@@ -1,10 +1,5 @@
 #include "bullet.h"
 
-Bullet::Bullet(Vector2 pos) : Mimic()
-{
-    this->pos = pos;
-}
-
 void Bullet::setDestination(Vector2 destination)
 {
     this->destination = destination;
@@ -20,9 +15,9 @@ void Bullet::setDestination(Vector2 destination)
 
 bool Bullet::inFrame()
 {
-    return !(this->pos.x < 1080 + this->texture->getWidth() &&
+    return !(this->pos.x < phraktal::levels::LEVEL_WIDTH + this->texture->getWidth() &&
             this->pos.x > 0 - this->texture->getWidth() &&
-            this->pos.y < 720 + this->texture->getHeight() &&
+            this->pos.y < phraktal::levels::LEVEL_HEIGHT + this->texture->getHeight() &&
             this->pos.y > 0 - this->texture->getHeight());
 }
 
@@ -36,5 +31,5 @@ void Bullet::update(float dTime)
 
 void Bullet::render()
 {
-    this->texture->renderTexture((int) this->pos.x, (int) this->pos.y, NULL, this->angle, NULL, SDL_FLIP_NONE);
+    this->texture->renderTexture((int) this->pos.x - (int) this->camera->pos.x, (int) this->pos.y - (int) this->camera->pos.y, NULL, this->angle, NULL, SDL_FLIP_NONE);
 }

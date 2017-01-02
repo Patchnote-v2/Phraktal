@@ -11,7 +11,7 @@ const std::string BULLET_PNG = "assets/bullet.png";
 class Bullet : public Mimic
 {
 public:
-    Bullet(Vector2 pos);
+    Bullet(Vector2 pos, std::shared_ptr< Camera > camera) : Mimic(camera) {this->pos = pos;};
     ~Bullet() {};
 
     void setDestination(Vector2 destination);

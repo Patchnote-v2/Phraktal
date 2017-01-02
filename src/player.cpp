@@ -9,21 +9,17 @@ void Player::handleEvents(SDL_Event& e)
         int x;
         int y;
         SDL_GetMouseState(&x, &y);
-        this->aim.x = x;
-        this->aim.y = y;
+        this->aim.x = x + this->camera->pos.x;
+        this->aim.y = y + this->camera->pos.y;
     }
 
     if (e.type == SDL_MOUSEBUTTONDOWN)
     {
         if (e.button.button == SDL_BUTTON_RIGHT)
         {
-            this->oldPos.x = this->pos.x;
-            this->oldPos.y = this->pos.y;
-            this->pos.x = e.button.x;
-            this->pos.y = e.button.y;
-            this->center.x = this->pos.x + (this->texture->getWidth() / 2);
-            this->center.y = this->pos.y + (this->texture->getHeight() / 2);
-            this->angle = (std::atan2(this->center.y - this->pos.y, this->center.x - this->pos.x) * (180 / PI)) - 90;
+            int temp = (int) this->camera->pos.x + (int) e.button.x;
+            this->setPos(this->pos.x - (this->pos.x - (this->camera->pos.x + e.button.x)), this->pos.y - (this->pos.y - (this->camera->pos.y + e.button.y)));
+            this->angle = (std::atan2(this->center.y - (this->pos.y  + this->camera->pos.y), this->center.x - (this->pos.x + this->camera->pos.x)) * (180 / PI)) - 90;
             if (this->angle < 0)
             {
                 this->angle = 360 - (-angle);
@@ -58,12 +54,12 @@ void Player::handleKeystates(const Uint8* keystates)
 {
     if (keystates[SDL_SCANCODE_A])
     {
-        // std::cout << "a";
+//         std::cout << "a";
         this->velocity.x -= 1;
     }
     if (keystates[SDL_SCANCODE_D])
     {
-        // std::cout << "d";
+//         std::cout << "d";
         this->velocity.x += 1;
     }
     if (this->destination.x == 0 && !keystates[SDL_SCANCODE_A] && !keystates[SDL_SCANCODE_D])
@@ -73,19 +69,19 @@ void Player::handleKeystates(const Uint8* keystates)
 
     if (keystates[SDL_SCANCODE_W])
     {
-        // std::cout << "w";
+//         std::cout << "w";
         this->velocity.y -= 1;
     }
     if (keystates[SDL_SCANCODE_S])
     {
-        // std::cout << "s";
+//         std::cout << "s";
         this->velocity.y += 1;
     }
     if (this->destination.y == 0 && !keystates[SDL_SCANCODE_W] && !keystates[SDL_SCANCODE_S])
     {
         this->velocity.y = 0;
     }
-    // std::cout << std::endl;
+//     std::cout << std::endl;
 }
 
 void Player::update(float dTime)
@@ -120,12 +116,12 @@ void Player::update(float dTime)
         this->velocity.y = -1;
     }
 
-    // Update old position, position
-    if (!phraktal::utils::almostEqual(this->pos.x, this->oldPos.x, FLT_EPSILON * 50000000))
+    // Update old position
+    if ((int) this->pos.x != (int) this->oldPos.x)
     {
         this->oldPos.x = this->pos.x;
     }
-    if (!phraktal::utils::almostEqual(this->pos.y, this->oldPos.y, FLT_EPSILON * 50000000))
+    if ((int) this->pos.y != (int) this->oldPos.y)
     {
         this->oldPos.y = this->pos.y;
     }
@@ -137,8 +133,11 @@ void Player::update(float dTime)
     this->center.y = this->pos.y + (this->texture->getHeight() / 2);
     this->updateAngle();
 
-    // todo
-    // Old code for destination navigation
+    // Update camera
+    this->camera->pos.x = (int) this->center.x - (phraktal::levels::SCREEN_WIDTH / 2);
+    this->camera->pos.y = (int) this->center.y - (phraktal::levels::SCREEN_HEIGHT / 2);
+
+    // todo: old code for destination navigation
     /*
     if (abs(this->pos.x - this->destination.x) <= abs(this->velocity.x * dTime * MAX_SPEED) + EPSILON)
     {
@@ -165,24 +164,24 @@ void Player::update(float dTime)
 
 
 
-    // Boundary box
-    if (this->pos.x <= 0)
+    // Keep within level size
+    if ((int) this->pos.x <= 0)
     {
         this->velocity.x = 10;
 //        this->pos.x = 1;
     }
-    else if (this->pos.x > 1080 - this->texture->getWidth())
+    else if ((int) this->pos.x > phraktal::levels::LEVEL_WIDTH - this->texture->getWidth())
     {
         this->velocity.x = -10;
 //        this->pos.x = 1080 - this->texture->getWidth();
     }
 
-    if (this->pos.y <= 0)
+    if ((int) this->pos.y <= 0)
     {
         this->velocity.y = 10;
 //        this->pos.y = 1;
     }
-    else if (this->pos.y > 720 - this->texture->getHeight())
+    else if ((int) this->pos.y > phraktal::levels::LEVEL_HEIGHT - this->texture->getHeight())
     {
         this->velocity.y = -10;
 //        this->pos.y = 720 - this->texture->getHeight();
@@ -196,22 +195,22 @@ void Player::render()
     {
         bullet->render();
     }
-    this->texture->renderTexture((int) this->pos.x, (int) this->pos.y, NULL, this->angle, NULL, SDL_FLIP_NONE);
+    this->texture->renderTexture((int) this->pos.x - (int) this->camera->pos.x, (int) this->pos.y - (int) this->camera->pos.y, NULL, this->angle, NULL, SDL_FLIP_NONE);
 }
 
 void Player::setPos(int x, int y)
 {
-    this->pos.x = x;
-    this->pos.y = y;
     this->oldPos.x = this->pos.x;
     this->oldPos.y = this->pos.y;
+    this->pos.x = x;
+    this->pos.y = y;
     this->center.x = this->pos.x + (this->texture->getWidth() / 2);
     this->center.y = this->pos.y + (this->texture->getHeight() / 2);
 }
 
 void Player::updateAngle()
 {
-    this->angle = (atan2(this->center.y - this->aim.y, this->center.x - this->aim.x) * (180 / PI)) - 90;
+    this->angle = (atan2(this->center.y - this->camera->pos.y - this->aim.y, this->center.x - this->camera->pos.x - this->aim.x) * (180 / PI)) - 90;
     if (this->angle < 0)
     {
         this->angle = 360 - (-angle);
@@ -220,10 +219,11 @@ void Player::updateAngle()
 
 void Player::fireBullet()
 {
-    Bullet* bullet = new Bullet(this->center);
+    // todo: smart_ptr
+    Bullet* bullet = new Bullet(this->center, camera);
     bullet->setDestination(this->aim);
     bullet->setRenderer(this->texture->getRenderer());
-    bullet->setTexture("assets/bullet.png");
+    bullet->setTexture(phraktal::assets::BULLET_PNG);
 
     this->bullets.push_back(bullet);
 }

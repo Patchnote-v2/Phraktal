@@ -6,22 +6,6 @@ TextureW::TextureW()
     this->tW = 0;
     this->tH = 0;
 }
-TextureW::~TextureW()
-{
-    this->renderer = nullptr;
-    if (this->font != nullptr)
-    {
-        TTF_CloseFont(this->font.get());
-        this->font = nullptr;
-    }
-    if (this->texture != nullptr)
-    {
-        SDL_DestroyTexture(this->texture.get());
-        this->texture = nullptr;
-        this->tW = 0;
-        this->tH = 0;
-    }
-}
 
 bool TextureW::setRenderer(std::shared_ptr< SDL_Renderer > ren)
 {
@@ -162,7 +146,15 @@ bool TextureW::setFont(std::string fontFile, int fontSize)
     {
         this->clearFont();
         this->font.reset(TTF_OpenFont(fontFile.c_str(), fontSize));
-        return this->font != nullptr;
+        if (this->font != nullptr)
+        {
+            return this->font != nullptr;
+        }
+        else
+        {
+            std::cout << "Unable to load font: " << fontFile << std::endl;
+            return false;
+        }
     }
     else
     {
@@ -179,16 +171,15 @@ void TextureW::clearFont()
 {
     if (this->isFontSet())
     {
-        TTF_CloseFont(this->font.get());
         this->font = nullptr;
     }
 }
 
 // x, y, clip, angle, center, flip
-void TextureW::renderTexture(int x, int y, std::unique_ptr< SDL_Rect > clip, double angle,
+void TextureW::renderTexture(int x, int y, std::shared_ptr< SDL_Rect > clip, double angle,
                              std::unique_ptr< SDL_Point > center, SDL_RendererFlip flip)
 {
-    SDL_Rect destination = {x, y, tW, tH};
+    SDL_Rect destination = {x, y, this->tW, this->tH};
 
     if (clip != NULL)
     {

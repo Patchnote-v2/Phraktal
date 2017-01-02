@@ -1,26 +1,67 @@
 #ifndef TOPDOWN_UTILS_H
 #define TOPDOWN_UTILS_H
 
-#include <iostream>
+#define PI 3.14159265
+
 #include <cfloat>
 #include <memory>
+#include <iostream>
 
 #include "SDL2/SDL.h"
+#include "SDL_ttf.h"
 
 namespace phraktal
 {
+    namespace levels
+    {
+        const Uint32 SCREEN_FPS = 60;
+        const Uint32 SCREEN_TICKS_PER_FRAME = 1000 / SCREEN_FPS;
+
+        // Level numbers
+        const int LEVEL_WIDTH = 1920;
+//        const int LEVEL_WIDTH = 1080;
+        const int LEVEL_HEIGHT = 1080;
+//        const int LEVEL_HEIGHT = 480;
+        const int SCREEN_WIDTH = 1080;
+        const int SCREEN_HEIGHT = 480;
+        const int TILE_SIZE = 32;
+
+        const std::string LEVEL1_TXT = "assets/levels/level1.txt";
+    }
+
+    namespace assets
+    {
+        const std::string DEFAULT_FONT = "assets/fonts/sample.ttf";
+
+        const std::string BG_PNG = "assets/images/bg.png";
+        const std::string PLAYER_PNG = "assets/images/player.png";
+        const std::string ENEMY_PNG = "assets/images/enemy.png";
+        const std::string BULLET_PNG = "assets/images/bullet.png";
+
+        const std::string VOID_PNG = "assets/images/void.png";
+        const std::string GRASS_PNG = "assets/images/grass.png";
+        const std::string STONE_PNG = "assets/images/stone.png";
+    }
+
+    namespace tiles
+    {
+        const int NUM_TILES = 0x03;
+        const int VOID = 0x00;
+        const int GRASS = 0x01;
+        const int STONE = 0x02;
+    }
+
     namespace utils
     {
         struct SDL_Deleter
         {
-            void operator()(int i) const {std::cout << "Success" << i << std::endl;}
             void operator()(SDL_Window* win) const {SDL_DestroyWindow(win);}
             void operator()(SDL_Renderer* ren) const {SDL_DestroyRenderer(ren);}
             void operator()(SDL_Texture* tex) const {SDL_DestroyTexture(tex);}
             void operator()(TTF_Font* font) const {TTF_CloseFont(font);}
         };
 
-
+        /*
         inline bool almostEqual(float A, float B, float maxDiff, float maxRelDiff = FLT_EPSILON)
         {
             // Check if the numbers are really close -- needed
@@ -40,6 +81,7 @@ namespace phraktal
 
             return false;
         }
+         */
     }
 }
 

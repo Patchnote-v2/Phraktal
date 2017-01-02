@@ -1,6 +1,6 @@
 #include "mimic.h"
 
-Mimic::Mimic() : texture(new TextureW()), oldPos(0.f, 0.f), pos(0.f, 0.f), center(0.f, 0.f), aim(0.f, 0.f), velocity(0.f, 0.f), destination(0.f, 0.f)
+Mimic::Mimic(std::shared_ptr< Camera > camera) : camera(camera), texture(new TextureW()), oldPos(0.f, 0.f), pos(0.f, 0.f), center(0.f, 0.f), aim(0.f, 0.f), velocity(0.f, 0.f), destination(0.f, 0.f)
 {
     this->center = {0, 0};
     this->angle = 0.f;
@@ -37,10 +37,14 @@ std::shared_ptr< Vector2 > Mimic::getPos()
 {
     return std::make_shared< Vector2 >(this->pos);
 }
+std::shared_ptr< Vector2 > Mimic::getCenter()
+{
+    return std::make_shared< Vector2 >(this->center);
+}
 
 bool Mimic::hasMoved()
 {
-    return !phraktal::utils::almostEqual(this->pos.x, this->oldPos.x, FLT_EPSILON * 50000000) || !phraktal::utils::almostEqual(this->pos.y, this->oldPos.y, FLT_EPSILON * 50000000);
+    return ((int) this->pos.x != (int) this->oldPos.x) || ((int) this->pos.y != (int) this->oldPos.y);
 //    return (this->pos.x != this->oldPos.x || this->pos.y != this->oldPos.y);
 }
 
@@ -59,5 +63,5 @@ void Mimic::update(float)
 
 void Mimic::render()
 {
-    this->texture->renderTexture((int) this->pos.x, (int) this->pos.y, NULL, this->angle, NULL, SDL_FLIP_NONE);
+    this->texture->renderTexture((int) this->pos.x - (int) this->camera->pos.x, (int) this->pos.y - (int) this->camera->pos.y, NULL, this->angle, NULL, SDL_FLIP_NONE);
 }
