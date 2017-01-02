@@ -125,8 +125,8 @@ void Player::update(float dTime)
     this->pos.y += this->velocity.y * dTime * MAX_SPEED;
 
     // Update center, angle
-//    this->center.x = this->pos.x + (this->texture->getWidth() / 2);
-//    this->center.y = this->pos.y + (this->texture->getHeight() / 2);
+    this->center.x = this->pos.x + (this->texture->getWidth() / 2);
+    this->center.y = this->pos.y + (this->texture->getHeight() / 2);
     this->updateAngle();
 
     // Update camera
