@@ -1,13 +1,11 @@
-#include "player.h"
+#include "mimics/player.h"
 
 void Player::handleEvents(SDL_Event& e)
 {
     // Type pretedermined
-    
     if (e.type == SDL_MOUSEMOTION)
     {
-        int x;
-        int y;
+        int x, y;
         SDL_GetMouseState(&x, &y);
         this->aim.x = x + this->camera->pos.x;
         this->aim.y = y + this->camera->pos.y;
@@ -17,14 +15,9 @@ void Player::handleEvents(SDL_Event& e)
     {
         if (e.button.button == SDL_BUTTON_RIGHT)
         {
-            int temp = (int) this->camera->pos.x + (int) e.button.x;
-            this->setPos(this->pos.x - (this->pos.x - (this->camera->pos.x + e.button.x)), this->pos.y - (this->pos.y - (this->camera->pos.y + e.button.y)));
-            this->updateAngle();
+            this->setPos((int) this->pos.x - ((int) this->pos.x - ((int) this->camera->pos.x + e.button.x)),
+                         (int) this->pos.y - ((int) this->pos.y - ((int) this->camera->pos.y + e.button.y)));
         }
-        else if (e.button.button == SDL_BUTTON_LEFT)
-        {
-            this->fireBullet();
-
         /* Old code for waypoints
             int x;
             int y;
@@ -42,7 +35,6 @@ void Player::handleEvents(SDL_Event& e)
             this->velocity.y = y - this->pos.y;
             this->velocity.normalize();
         */
-        }
     }
 }
 
@@ -82,17 +74,6 @@ void Player::handleKeystates(const Uint8* keystates)
 
 void Player::update(float dTime)
 {
-    // Update bullets
-    for (unsigned int i = 0; i < this->bullets.size(); i++)
-    {
-        Bullet* bullet = this->bullets[i];
-        bullet->update(dTime);
-        if (bullet->inFrame())
-        {
-            this->bullets.erase(this->bullets.begin() + i);
-        }
-    }
-
     // Set max speed
     if (this->velocity.x > 1)
     {
@@ -125,8 +106,7 @@ void Player::update(float dTime)
     this->pos.y += this->velocity.y * dTime * MAX_SPEED;
 
     // Update center, angle
-    this->center.x = this->pos.x + (this->texture->getWidth() / 2);
-    this->center.y = this->pos.y + (this->texture->getHeight() / 2);
+    this->updateCenter();
     this->updateAngle();
 
     // Update camera
@@ -184,30 +164,26 @@ void Player::update(float dTime)
     }
 }
 
-
 void Player::render()
 {
-    for (Bullet* bullet : this->bullets)
-    {
-        bullet->render();
-    }
     this->texture->renderTexture((int) this->pos.x - (int) this->camera->pos.x, (int) this->pos.y - (int) this->camera->pos.y, NULL, this->angle, NULL, SDL_FLIP_NONE);
 }
+
 
 void Player::setPos(int x, int y)
 {
     this->oldPos.x = this->pos.x;
-    std::cout << "oPX: " << this->oldPos.x << std::endl;
     this->oldPos.y = this->pos.y;
-    std::cout << "oPY: " << this->oldPos.y << std::endl;
     this->pos.x = x;
-    std::cout << "pX: " << this->pos.x << std::endl;
     this->pos.y = y;
-    std::cout << "pY: " << this->pos.y << std::endl;
+    this->updateCenter();
+    this->updateAngle();
+}
+
+void Player::updateCenter()
+{
     this->center.x = this->pos.x + (this->texture->getWidth() / 2);
-    std::cout << "cX: " << this->center.x << std::endl;
     this->center.y = this->pos.y + (this->texture->getHeight() / 2);
-    std::cout << "cY: " << this->center.y << std::endl;
 }
 
 void Player::updateAngle()
@@ -217,15 +193,4 @@ void Player::updateAngle()
     {
         this->angle = 360 - (-angle);
     }
-}
-
-void Player::fireBullet()
-{
-    // todo: smart_ptr
-    Bullet* bullet = new Bullet(this->center, camera);
-    bullet->setDestination(this->aim);
-    bullet->setRenderer(this->texture->getRenderer());
-    bullet->setTexture(phraktal::assets::BULLET_PNG);
-
-    this->bullets.push_back(bullet);
 }

@@ -14,17 +14,17 @@
 #include "SDL_ttf.h"
 
 // Data structures and utilities
-#include "log.h"
-#include "texturew.h"
-#include "timer.h"
-#include "vector2.h"
-#include "utils.h"
+#include "base/log.h"
+#include "base/texturew.h"
+#include "base/timer.h"
+#include "base/vector2.h"
+#include "base/utils.h"
 
 // Game objects
-#include "mimic.h"
+#include "mimics/mimic.h"
 #include "camera.h"
-#include "player.h"
-#include "enemy.h"
+#include "mimics/player.h"
+#include "mimics/enemy.h"
 
 
 int init()
@@ -143,6 +143,9 @@ int main()
 //    player->setPos(538, 250);
     player->setPos(550, 250);
     mimics.push_back(player);
+        // Bullets
+    std::vector< std::unique_ptr< Bullet > > bullets;
+
     // todo: insert grid
 
     /*
@@ -185,7 +188,23 @@ int main()
             }
             if (e.type == SDL_MOUSEBUTTONDOWN)
             {
-                player->handleEvents(e);
+                if (e.button.button == SDL_BUTTON_LEFT)
+                {
+                    int x, y;
+                    SDL_GetMouseState(&x, &y);
+                    x = x + (int) camera->pos.x;
+                    y = y + (int) camera->pos.y;
+                    std::unique_ptr< Bullet > bullet(new Bullet(*(player->getCenter().get()), camera));
+                    bullet->setDestination(x, y);
+                    bullet->setRenderer(renderer);
+                    bullet->setTexture(phraktal::assets::BULLET_PNG);
+
+                    bullets.push_back(std::move(bullet));
+                }
+                else
+                {
+                    player->handleEvents(e);
+                }
             }
             if (e.type == SDL_KEYDOWN)
             {
@@ -250,6 +269,14 @@ int main()
         {
             mimic->update(dTime);
         }
+        for (unsigned int i = 0; i < bullets.size(); i++)
+        {
+            bullets[i]->update(dTime);
+            if (bullets[i]->inFrame())
+            {
+                bullets.erase(bullets.begin() + i);
+            }
+        }
 
         //todo: update grid
         deltaTimer->start();
@@ -260,13 +287,21 @@ int main()
         // Render textures
         SDL_SetRenderDrawColor(renderer.get(), 0x00, 0x00, 0x00, 0xFF);
         SDL_RenderClear(renderer.get());
+
         images["bg"]->renderTexture(0, 0, camera->getRect());
         images["fpsCounter"]->renderTexture(10, 10);
         images["stats"]->renderTexture(10, images["fpsCounter"]->getHeight() + 20);
-//        SDL_RenderDrawPoint(renderer.get(), (int) camera->center.x, (int) camera->center.y);
+
+        level1->render(camera);
+
+
         for (auto mimic : mimics)
         {
             mimic->render();
+        }
+        for (unsigned int i = 0; i < bullets.size(); i++)
+        {
+            bullets[i]->render();
         }
         //todo: render grid
         SDL_RenderPresent(renderer.get());

@@ -1,4 +1,4 @@
-#include "enemy.h"
+#include "mimics/enemy.h"
 
 void Enemy::setPos(int x, int y)
 {

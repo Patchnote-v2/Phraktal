@@ -15,6 +15,8 @@ public:
     ~Bullet() {};
 
     void setDestination(Vector2 destination);
+
+    void setDestination(int x, int y);
     bool inFrame();
     void update(float dTime) override;
     void render() override;

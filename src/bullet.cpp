@@ -1,4 +1,4 @@
-#include "bullet.h"
+#include "mimics/bullet.h"
 
 void Bullet::setDestination(Vector2 destination)
 {
@@ -6,11 +6,17 @@ void Bullet::setDestination(Vector2 destination)
     this->velocity.x = this->destination.x - this->pos.x;
     this->velocity.y = this->destination.y - this->pos.y;
     this->velocity.normalize();
-    this->angle = (std::atan2(this->destination.x - this->pos.y, this->destination.y - this->pos.x) * (180 / PI)) - 90;
+    this->angle = (std::atan2(this->pos.y + this->camera->pos.y - (this->destination.y + this->camera->pos.y), this->pos.x + this->camera->pos.x - (this->destination.x + this->camera->pos.x)) * (180 / PI)) - 90;
     if (this->angle < 0)
     {
         this->angle = 360 - (-angle);
     }
+}
+
+void Bullet::setDestination(int x, int y)
+{
+    Vector2 destination((float) x, (float) y);
+    this->setDestination(destination);
 }
 
 bool Bullet::inFrame()
@@ -31,5 +37,8 @@ void Bullet::update(float dTime)
 
 void Bullet::render()
 {
-    this->texture->renderTexture((int) this->pos.x - (int) this->camera->pos.x, (int) this->pos.y - (int) this->camera->pos.y, NULL, this->angle, NULL, SDL_FLIP_NONE);
+    if (SDL_HasIntersection(this->getRect().get(), this->camera->getRect().get()))
+    {
+        this->texture->renderTexture((int) this->pos.x - (int) this->camera->pos.x, (int) this->pos.y - (int) this->camera->pos.y, NULL, this->angle, NULL, SDL_FLIP_NONE);
+    }
 }

@@ -1,4 +1,4 @@
-#include "mimic.h"
+#include "mimics/mimic.h"
 
 Mimic::Mimic(std::shared_ptr< Camera > camera) : camera(camera), texture(new TextureW()), oldPos(0.f, 0.f), pos(0.f, 0.f), center(0.f, 0.f), aim(0.f, 0.f), velocity(0.f, 0.f), destination(0.f, 0.f)
 {

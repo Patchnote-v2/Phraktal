@@ -15,7 +15,6 @@ class Player : public Mimic
 {
 public:
     Type type;
-    std::vector<Bullet*> bullets;
     Player(std::shared_ptr< Camera > camera) : Mimic(camera), type(Type::PLAYER) {};
     ~Player() {};
 
@@ -27,7 +26,9 @@ public:
     void render() override;
 private:
 
+    void updateCenter();
     void updateAngle();
+
     void fireBullet();
 };
 #endif

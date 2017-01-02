@@ -37,7 +37,7 @@ private:
     std::shared_ptr< SDL_Renderer > renderer;
     std::unique_ptr< TTF_Font, phraktal::utils::SDL_Deleter > font;
     std::unique_ptr< SDL_Texture, phraktal::utils::SDL_Deleter > texture;
-    int tW;
+    int w;
     int tH;
 };
 
