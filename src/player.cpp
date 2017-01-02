@@ -19,11 +19,7 @@ void Player::handleEvents(SDL_Event& e)
         {
             int temp = (int) this->camera->pos.x + (int) e.button.x;
             this->setPos(this->pos.x - (this->pos.x - (this->camera->pos.x + e.button.x)), this->pos.y - (this->pos.y - (this->camera->pos.y + e.button.y)));
-            this->angle = (std::atan2(this->center.y - (this->pos.y  + this->camera->pos.y), this->center.x - (this->pos.x + this->camera->pos.x)) * (180 / PI)) - 90;
-            if (this->angle < 0)
-            {
-                this->angle = 360 - (-angle);
-            }
+            this->updateAngle();
         }
         else if (e.button.button == SDL_BUTTON_LEFT)
         {
@@ -129,8 +125,8 @@ void Player::update(float dTime)
     this->pos.y += this->velocity.y * dTime * MAX_SPEED;
 
     // Update center, angle
-    this->center.x = this->pos.x + (this->texture->getWidth() / 2);
-    this->center.y = this->pos.y + (this->texture->getHeight() / 2);
+//    this->center.x = this->pos.x + (this->texture->getWidth() / 2);
+//    this->center.y = this->pos.y + (this->texture->getHeight() / 2);
     this->updateAngle();
 
     // Update camera
@@ -201,16 +197,22 @@ void Player::render()
 void Player::setPos(int x, int y)
 {
     this->oldPos.x = this->pos.x;
+    std::cout << "oPX: " << this->oldPos.x << std::endl;
     this->oldPos.y = this->pos.y;
+    std::cout << "oPY: " << this->oldPos.y << std::endl;
     this->pos.x = x;
+    std::cout << "pX: " << this->pos.x << std::endl;
     this->pos.y = y;
+    std::cout << "pY: " << this->pos.y << std::endl;
     this->center.x = this->pos.x + (this->texture->getWidth() / 2);
+    std::cout << "cX: " << this->center.x << std::endl;
     this->center.y = this->pos.y + (this->texture->getHeight() / 2);
+    std::cout << "cY: " << this->center.y << std::endl;
 }
 
 void Player::updateAngle()
 {
-    this->angle = (atan2(this->center.y - this->camera->pos.y - this->aim.y, this->center.x - this->camera->pos.x - this->aim.x) * (180 / PI)) - 90;
+    this->angle = (std::atan2(this->center.y + this->camera->pos.y - (this->aim.y + this->camera->pos.y), this->center.x + this->camera->pos.x - (this->aim.x + this->camera->pos.x)) * (180 / PI)) - 90;
     if (this->angle < 0)
     {
         this->angle = 360 - (-angle);
