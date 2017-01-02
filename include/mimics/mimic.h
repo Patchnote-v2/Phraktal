@@ -7,9 +7,9 @@
 #include <memory>
 
 #include "SDL2/SDL.h"
-#include "texturew.h"
-#include "vector2.h"
-#include "utils.h"
+#include "base/texturew.h"
+#include "base/vector2.h"
+#include "base/utils.h"
 #include "level.h"
 #include "camera.h"
 
