@@ -13,5 +13,6 @@ public:
     Type type;
     Enemy(std::shared_ptr< Camera > camera) : Mimic(camera), type(Type::ENEMY) {};
     void setPos(int x, int y);
+    Type getType();
 };
 #endif

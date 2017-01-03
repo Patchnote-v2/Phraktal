@@ -140,33 +140,12 @@ int main()
     auto player = std::make_shared< Player >(camera);
     player->setRenderer(renderer);
     player->setTexture(phraktal::assets::PLAYER_PNG);
-//    player->setPos(538, 250);
     player->setPos(550, 250);
     mimics.push_back(player);
-        // Bullets
+    // Bullets
     std::vector< std::unique_ptr< Bullet > > bullets;
 
     // todo: insert grid
-
-    /*
-    Enemy* enemy2 = new Enemy();
-    enemy2->setRenderer(renderer);
-    enemy2->setTexture(ENEMY_PNG);
-    enemy2->setPos(555, 555);
-    quadtree.insert(enemy2);
-
-    Enemy* enemy3 = new Enemy();
-    enemy3->setRenderer(renderer);
-    enemy3->setTexture(ENEMY_PNG);
-    enemy3->setPos(455, 455);
-    quadtree.insert(enemy3);
-
-    Enemy* enemy4 = new Enemy();
-    enemy4->setRenderer(renderer);
-    enemy4->setTexture(ENEMY_PNG);
-    enemy4->setPos(355, 355);
-    quadtree.insert(enemy4);
-     */
 
     // Main loop
     SDL_Event e;
@@ -215,23 +194,19 @@ int main()
                     auto enemy = std::make_shared< Enemy >(camera);
                     enemy->setRenderer(renderer);
                     enemy->setTexture(phraktal::assets::ENEMY_PNG);
-                    enemy->setPos(x, y);
+                    enemy->setPos(x + (int) camera->pos.x, y + (int) camera->pos.y);
                     mimics.push_back(enemy);
                     //todo insert grid
                 }
                 if (e.key.keysym.sym == SDLK_x)
                 {
-                    std::cout << mimics.size() << std::endl;
-
-                    for (unsigned int i = 1; i < mimics.size(); i++)
-                    {
-                        // todo: remove?
-                    }
                     mimics.clear();
                     mimics.shrink_to_fit();
-                    std::cout << mimics.size() << std::endl;
                     mimics.push_back(player);
-                    std::cout << mimics.size() << std::endl;
+                }
+                if (e.key.keysym.sym == SDLK_o)
+                {
+                    // Reserved for debugging
                 }
             }
             if (e.type == SDL_KEYUP)
@@ -256,11 +231,6 @@ int main()
         statsText <<  "Y: " << player->getPos()->y << std::endl;
         statsText << "oX: " << player->getOldPos()->x << std::endl;
         statsText <<  "oY: " << player->getOldPos()->y << std::endl;
-
-        statsText << "cX: " << camera->getRect()->x << std::endl;
-        statsText << "cY: " << camera->getRect()->y << std::endl;
-        statsText << "cCX: " << camera->center.x << std::endl;
-        statsText << "cCY: " << camera->center.y << std::endl;
         images["stats"]->loadTextureFromText(statsText.str(), color, 250);
 
         // Delta time and updates
@@ -272,10 +242,25 @@ int main()
         for (unsigned int i = 0; i < bullets.size(); i++)
         {
             bullets[i]->update(dTime);
+
+            for (int n = 0; n < mimics.size(); n++)
+            {
+                if (mimics[n]->getType() == Type::ENEMY)
+                {
+                    if (SDL_HasIntersection(bullets[i]->getRect().get(), mimics[n]->getRect().get()))
+                    {
+                        mimics.erase(mimics.begin() + n);
+                        bullets.erase(bullets.begin() + i);
+                        goto next;
+                    }
+                }
+            }
+
             if (bullets[i]->inFrame())
             {
                 bullets.erase(bullets.begin() + i);
             }
+            next:;
         }
 
         //todo: update grid
@@ -293,7 +278,6 @@ int main()
         images["stats"]->renderTexture(10, images["fpsCounter"]->getHeight() + 20);
 
         level1->render(camera);
-
 
         for (auto mimic : mimics)
         {

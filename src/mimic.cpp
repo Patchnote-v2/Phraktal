@@ -42,6 +42,11 @@ std::shared_ptr< Vector2 > Mimic::getCenter()
     return std::make_shared< Vector2 >(this->center);
 }
 
+Type Mimic::getType()
+{
+    return Type::NONE;
+}
+
 bool Mimic::hasMoved()
 {
     return ((int) this->pos.x != (int) this->oldPos.x) || ((int) this->pos.y != (int) this->oldPos.y);

@@ -9,7 +9,7 @@
 #include "bullet.h"
 #include "camera.h"
 
-const int MAX_SPEED = 10;
+const int MAX_SPEED = 255;
 
 class Player : public Mimic
 {
@@ -25,10 +25,7 @@ public:
     void update(float dTime) override;
     void render() override;
 private:
-
     void updateCenter();
     void updateAngle();
-
-    void fireBullet();
 };
 #endif

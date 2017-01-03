@@ -180,6 +180,11 @@ void Player::setPos(int x, int y)
     this->updateAngle();
 }
 
+Type Player::getType()
+{
+    return this->type;
+}
+
 void Player::updateCenter()
 {
     this->center.x = this->pos.x + (this->texture->getWidth() / 2);
