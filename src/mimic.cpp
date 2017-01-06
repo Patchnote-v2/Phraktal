@@ -42,9 +42,14 @@ std::shared_ptr< Vector2 > Mimic::getCenter()
     return std::make_shared< Vector2 >(this->center);
 }
 
-Type Mimic::getType()
+void Mimic::setType(Type type)
 {
-    return Type::NONE;
+    this->type = type;
+}
+
+Type Mimic::getType() const
+{
+    return this->type;
 }
 
 bool Mimic::hasMoved()
@@ -62,8 +67,7 @@ bool Mimic::checkCollision(std::shared_ptr< Mimic > m2)
 
 void Mimic::update(float)
 {
-    // this->pos.x += this->velocity.x;
-    // this->pos.y += this->velocity.y;
+    //
 }
 
 void Mimic::render()

@@ -2,8 +2,8 @@
 #define TOPDOWN_CAMERA_H
 
 #include <memory>
-#include <utils.h>
-#include "vector2.h"
+#include <base/utils.h>
+#include "base/vector2.h"
 
 class Camera
 {

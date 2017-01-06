@@ -4,7 +4,8 @@
 #include <memory>
 #include <vector>
 
-#include "mimic.h"
+#include "mimics/mimic.h"
+#include "camera.h"
 
 class Mimic;
 
@@ -17,11 +18,10 @@ public:
     Level();
 
 //    void addMimic(std::shared_ptr< Mimic > mimic);
-//    bool hasMimic(std::shared_ptr< Mimic > mimic);
 //    void removeMimic(std::shared_ptr< Mimic > mimic);
 
     void loadFromFile(const std::string level, const std::shared_ptr< SDL_Renderer > renderer);
-    void render() const;
+    void render(const std::shared_ptr<Camera> camera) const;
 
     int getWidth() const;
     int getHeight() const;

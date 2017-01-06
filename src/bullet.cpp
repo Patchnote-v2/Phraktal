@@ -19,7 +19,7 @@ void Bullet::setDestination(int x, int y)
     this->setDestination(destination);
 }
 
-bool Bullet::inFrame()
+bool Bullet::inLevel()
 {
     return !(this->pos.x < phraktal::levels::LEVEL_WIDTH + this->texture->getWidth() &&
             this->pos.x > 0 - this->texture->getWidth() &&

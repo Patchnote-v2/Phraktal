@@ -8,6 +8,7 @@
 #include <cfloat>
 #include <memory>
 #include <level.h>
+#include <ctime>
 
 #include "SDL2/SDL.h"
 #include "SDL_image.h"
@@ -120,6 +121,7 @@ int main()
     std::unique_ptr<Timer> fpsTimer(new Timer());
     int countedFrames = 0;
     float averageFPS = 0.f;
+    Uint32 secondCounter = 0;
     fpsTimer->start();
 
     std::unique_ptr<Timer> capTimer(new Timer());
@@ -153,6 +155,20 @@ int main()
     while (!quit)
     {
         capTimer->start();
+        if (fpsTimer->getTicks() - secondCounter > 1000)
+        {
+            secondCounter = fpsTimer->getTicks();
+            std::srand((uint) std::time(0));
+            int x = (std::rand() % phraktal::levels::SCREEN_WIDTH);
+            int y = (std::rand() % phraktal::levels::SCREEN_HEIGHT);
+            auto testEnemy = std::make_shared< Enemy >(camera);
+            testEnemy->setRenderer(renderer);
+            testEnemy->setTexture(phraktal::assets::ENEMY_PNG);
+            testEnemy->setPos(x, y);
+            testEnemy->setCurrentTarget(player);
+            testEnemy->toggleActive();
+            mimics.push_back(testEnemy);
+        }
         player->handleKeystates(keystates);
 
         while (SDL_PollEvent(&e))
@@ -176,7 +192,8 @@ int main()
                     std::unique_ptr< Bullet > bullet(new Bullet(*(player->getCenter().get()), camera));
                     bullet->setDestination(x, y);
                     bullet->setRenderer(renderer);
-                    bullet->setTexture(phraktal::assets::BULLET_PNG);
+                    bullet->setTexture(phraktal::assets::PLAYER_BULLET_PNG);
+                    bullet->setType(Type::PLAYER_BULLET);
 
                     bullets.push_back(std::move(bullet));
                 }
@@ -195,6 +212,8 @@ int main()
                     enemy->setRenderer(renderer);
                     enemy->setTexture(phraktal::assets::ENEMY_PNG);
                     enemy->setPos(x + (int) camera->pos.x, y + (int) camera->pos.y);
+                    enemy->setCurrentTarget(player);
+                    enemy->toggleActive();
                     mimics.push_back(enemy);
                     //todo insert grid
                 }
@@ -207,6 +226,16 @@ int main()
                 if (e.key.keysym.sym == SDLK_o)
                 {
                     // Reserved for debugging
+                    std::srand((uint) std::time(0));
+                    int x = (std::rand() % phraktal::levels::SCREEN_WIDTH);
+                    int y = (std::rand() % phraktal::levels::SCREEN_HEIGHT);
+                    auto testEnemy = std::make_shared< Enemy >(camera);
+                    testEnemy->setRenderer(renderer);
+                    testEnemy->setTexture(phraktal::assets::ENEMY_PNG);
+                    testEnemy->setPos(x, y);
+                    testEnemy->setCurrentTarget(player);
+                    testEnemy->toggleActive();
+                    mimics.push_back(testEnemy);
                 }
             }
             if (e.type == SDL_KEYUP)
@@ -233,41 +262,76 @@ int main()
         statsText <<  "oY: " << player->getOldPos()->y << std::endl;
         images["stats"]->loadTextureFromText(statsText.str(), color, 250);
 
-        // Delta time and updates
+        // Delta time
         float dTime = deltaTimer->getTicks() / 1000.f;
+
+        // Update all mimics
         for (auto mimic : mimics)
         {
             mimic->update(dTime);
+
+            // Autofire enemy bullets
+            if (mimic->getType() == Type::ENEMY)
+            {
+                auto derived = std::dynamic_pointer_cast<Enemy>(mimic);
+                if ((int) derived->shotCooldown > 3)
+                {
+                    derived->shotCooldown = 0;
+                    std::unique_ptr< Bullet > bullet(new Bullet(*(derived->getCenter().get()), camera));
+                    bullet->setDestination((int) player->getCenter()->x, (int) player->getCenter()->y);
+                    bullet->setRenderer(renderer);
+                    bullet->setTexture(phraktal::assets::ENEMY_BULLET_PNG);
+                    bullet->setType(Type::ENEMY_BULLET);
+
+                    bullets.push_back(std::move(bullet));
+                }
+            }
         }
+
+        // Bullet collision check
         for (unsigned int i = 0; i < bullets.size(); i++)
         {
             bullets[i]->update(dTime);
 
-            for (int n = 0; n < mimics.size(); n++)
+            // Player bullet collision check
+            if (bullets[i]->getType() == Type::PLAYER_BULLET)
             {
-                if (mimics[n]->getType() == Type::ENEMY)
+                for (unsigned int n = 0; n < mimics.size(); n++)
                 {
-                    if (SDL_HasIntersection(bullets[i]->getRect().get(), mimics[n]->getRect().get()))
+                    if (mimics[n]->getType() == Type::ENEMY)
                     {
-                        mimics.erase(mimics.begin() + n);
-                        bullets.erase(bullets.begin() + i);
-                        goto next;
+                        if (SDL_HasIntersection(bullets[i]->getRect().get(), mimics[n]->getRect().get()))
+                        {
+                            mimics.erase(mimics.begin() + n);
+                            bullets.erase(bullets.begin() + i);
+                            goto next;
+                        }
                     }
                 }
             }
+            // Enemy bullet collision check
+            else if (bullets[i]->getType() == Type::ENEMY_BULLET)
+            {
+                if (SDL_HasIntersection(bullets[i]->getRect().get(), player->getRect().get()))
+                {
+                    std::cout << "HIT" << std::endl;
+                    goto next;
+                }
+            }
 
-            if (bullets[i]->inFrame())
+            // Delete bullet if out of level
+            if (bullets[i]->inLevel())
             {
                 bullets.erase(bullets.begin() + i);
             }
             next:;
         }
 
-        //todo: update grid
-        deltaTimer->start();
-
         // Camera
         camera->update();
+
+        //todo: update grid
+        deltaTimer->start();
 
         // Render textures
         SDL_SetRenderDrawColor(renderer.get(), 0x00, 0x00, 0x00, 0xFF);
@@ -277,12 +341,13 @@ int main()
         images["fpsCounter"]->renderTexture(10, 10);
         images["stats"]->renderTexture(10, images["fpsCounter"]->getHeight() + 20);
 
-        level1->render(camera);
-
+        // Render all mimics
         for (auto mimic : mimics)
         {
             mimic->render();
         }
+
+        // Render all bullets
         for (unsigned int i = 0; i < bullets.size(); i++)
         {
             bullets[i]->render();

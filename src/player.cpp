@@ -1,5 +1,14 @@
 #include "mimics/player.h"
 
+Player::Player(std::shared_ptr< Camera > camera) : Mimic(camera), type(Type::PLAYER), accelerationSpeed(15)
+{
+    this->keystates.insert(std::make_pair(SDL_SCANCODE_A, false));
+    this->keystates.insert(std::make_pair(SDL_SCANCODE_D, false));
+    this->keystates.insert(std::make_pair(SDL_SCANCODE_W, false));
+    this->keystates.insert(std::make_pair(SDL_SCANCODE_S, false));
+
+}
+
 void Player::handleEvents(SDL_Event& e)
 {
     // Type pretedermined
@@ -13,6 +22,7 @@ void Player::handleEvents(SDL_Event& e)
 
     if (e.type == SDL_MOUSEBUTTONDOWN)
     {
+        // Right-click action
         if (e.button.button == SDL_BUTTON_RIGHT)
         {
             this->setPos((int) this->pos.x - ((int) this->pos.x - ((int) this->camera->pos.x + e.button.x)),
@@ -40,57 +50,42 @@ void Player::handleEvents(SDL_Event& e)
 
 void Player::handleKeystates(const Uint8* keystates)
 {
-    if (keystates[SDL_SCANCODE_A])
-    {
-//         std::cout << "a";
-        this->velocity.x -= 1;
-    }
-    if (keystates[SDL_SCANCODE_D])
-    {
-//         std::cout << "d";
-        this->velocity.x += 1;
-    }
-    if (this->destination.x == 0 && !keystates[SDL_SCANCODE_A] && !keystates[SDL_SCANCODE_D])
-    {
-        this->velocity.x = 0;
-    }
+    this->keystates[SDL_SCANCODE_A] = keystates[SDL_SCANCODE_A];
+    this->keystates[SDL_SCANCODE_D] = keystates[SDL_SCANCODE_D];
+    this->keystates[SDL_SCANCODE_W] = keystates[SDL_SCANCODE_W];
+    this->keystates[SDL_SCANCODE_S] = keystates[SDL_SCANCODE_S];
 
-    if (keystates[SDL_SCANCODE_W])
-    {
-//         std::cout << "w";
-        this->velocity.y -= 1;
-    }
-    if (keystates[SDL_SCANCODE_S])
-    {
-//         std::cout << "s";
-        this->velocity.y += 1;
-    }
-    if (this->destination.y == 0 && !keystates[SDL_SCANCODE_W] && !keystates[SDL_SCANCODE_S])
-    {
-        this->velocity.y = 0;
-    }
-//     std::cout << std::endl;
+//    if (this->destination.x == 0 && !keystates[SDL_SCANCODE_A] && !keystates[SDL_SCANCODE_D])
+//    {
+//        this->keystates[SDL_SCANCODE_D] -= 2;
+//    }
+//
+//    if (this->destination.y == 0 && !keystates[SDL_SCANCODE_W] && !keystates[SDL_SCANCODE_S])
+//    {
+//        this->keystates[SDL_SCANCODE_S] -= 2;
+//    }
+
 }
 
 void Player::update(float dTime)
 {
     // Set max speed
-    if (this->velocity.x > 1)
+    if (this->velocity.x > MAX_X_VEL)
     {
-        this->velocity.x = 1;
+        this->velocity.x = MAX_X_VEL;
     }
-    if (this->velocity.x < -1)
+    if (this->velocity.x < -MAX_X_VEL)
     {
-        this->velocity.x = -1;
+        this->velocity.x = -MAX_X_VEL;
     }
 
-    if (this->velocity.y > 1)
+    if (this->velocity.y > MAX_Y_VEL)
     {
-        this->velocity.y = 1;
+        this->velocity.y = MAX_Y_VEL;
     }
-    if (this->velocity.y < -1)
+    if (this->velocity.y < -MAX_Y_VEL)
     {
-        this->velocity.y = -1;
+        this->velocity.y = -MAX_Y_VEL;
     }
 
     // Update old position
@@ -102,8 +97,31 @@ void Player::update(float dTime)
     {
         this->oldPos.y = this->pos.y;
     }
-    this->pos.x += this->velocity.x * dTime * MAX_SPEED;
-    this->pos.y += this->velocity.y * dTime * MAX_SPEED;
+
+
+    if (this->keystates[SDL_SCANCODE_A])
+    {
+        this->velocity.x -= accelerationSpeed;
+    }
+    if (this->keystates[SDL_SCANCODE_D])
+    {
+        this->velocity.x += accelerationSpeed;
+    }
+    if (this->keystates[SDL_SCANCODE_W])
+    {
+        this->velocity.y -= accelerationSpeed;
+    }
+    if (this->keystates[SDL_SCANCODE_S])
+    {
+        this->velocity.y += accelerationSpeed;
+    }
+
+    this->pos.x += this->velocity.x * (dTime);
+    this->pos.y += this->velocity.y * (dTime);
+
+    // Deceleration
+    this->velocity.x *= .98f;
+    this->velocity.y *= .98f;
 
     // Update center, angle
     this->updateCenter();
@@ -113,62 +131,30 @@ void Player::update(float dTime)
     this->camera->pos.x = (int) this->center.x - (phraktal::levels::SCREEN_WIDTH / 2);
     this->camera->pos.y = (int) this->center.y - (phraktal::levels::SCREEN_HEIGHT / 2);
 
-    // todo: old code for destination navigation
-    /*
-    if (abs(this->pos.x - this->destination.x) <= abs(this->velocity.x * dTime * MAX_SPEED) + EPSILON)
-    {
-        this->velocity.x = 0;
-        this->pos.x = this->destination.x;
-        this->destination.x = 0;
-    }
-    else
-    {
-        this->pos.x += this->velocity.x * dTime * MAX_SPEED;
-    }
-
-    if (abs(this->pos.y - this->destination.y) <= abs(this->velocity.y * dTime * MAX_SPEED) + EPSILON)
-    {
-        this->velocity.y = 0;
-        this->pos.y = this->destination.y;
-        this->destination.y = 0;
-    }
-    else
-    {
-        this->pos.y += this->velocity.y * dTime * MAX_SPEED;
-    }
-     */
-
-
-
     // Keep within level size
     if ((int) this->pos.x <= 0)
     {
-        this->velocity.x = 10;
-//        this->pos.x = 1;
+        this->velocity.x = -this->velocity.x;
     }
     else if ((int) this->pos.x > phraktal::levels::LEVEL_WIDTH - this->texture->getWidth())
     {
-        this->velocity.x = -10;
-//        this->pos.x = 1080 - this->texture->getWidth();
+        this->velocity.x = -this->velocity.x;
     }
-
     if ((int) this->pos.y <= 0)
     {
-        this->velocity.y = 10;
-//        this->pos.y = 1;
+        this->velocity.y = -this->velocity.y;
     }
     else if ((int) this->pos.y > phraktal::levels::LEVEL_HEIGHT - this->texture->getHeight())
     {
-        this->velocity.y = -10;
-//        this->pos.y = 720 - this->texture->getHeight();
+        this->velocity.y = -this->velocity.y;
     }
 }
+
 
 void Player::render()
 {
     this->texture->renderTexture((int) this->pos.x - (int) this->camera->pos.x, (int) this->pos.y - (int) this->camera->pos.y, NULL, this->angle, NULL, SDL_FLIP_NONE);
 }
-
 
 void Player::setPos(int x, int y)
 {

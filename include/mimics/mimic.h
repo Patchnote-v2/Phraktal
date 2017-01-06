@@ -15,7 +15,7 @@
 
 class Level;
 
-enum class Type {NONE, PLAYER, ENEMY, BULLET};
+enum class Type {NONE, PLAYER, ENEMY, PLAYER_BULLET, ENEMY_BULLET};
 
 class Mimic
 {
@@ -30,7 +30,8 @@ public:
     std::shared_ptr< Vector2 > getOldPos();
     std::shared_ptr< Vector2 > getPos();
     std::shared_ptr< Vector2 > getCenter();
-    virtual Type getType();
+    void setType(Type type);
+    Type getType() const;
     bool hasMoved();
     virtual bool checkCollision(std::shared_ptr< Mimic > m2);
 

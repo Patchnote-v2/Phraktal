@@ -22,8 +22,8 @@ namespace phraktal
 //        const int LEVEL_WIDTH = 1080;
         const int LEVEL_HEIGHT = 1080;
 //        const int LEVEL_HEIGHT = 480;
-        const int SCREEN_WIDTH = 1080;
-        const int SCREEN_HEIGHT = 480;
+        const int SCREEN_WIDTH = 1280;
+        const int SCREEN_HEIGHT = 720;
         const int TILE_SIZE = 32;
 
         const std::string LEVEL1_TXT = "assets/levels/level1.txt";
@@ -36,7 +36,8 @@ namespace phraktal
         const std::string BG_PNG = "assets/images/bg.png";
         const std::string PLAYER_PNG = "assets/images/player.png";
         const std::string ENEMY_PNG = "assets/images/enemy.png";
-        const std::string BULLET_PNG = "assets/images/bullet.png";
+        const std::string PLAYER_BULLET_PNG = "assets/images/playerbullet.png";
+        const std::string ENEMY_BULLET_PNG = "assets/images/enemybullet.png";
 
         const std::string VOID_PNG = "assets/images/void.png";
         const std::string GRASS_PNG = "assets/images/grass.png";
@@ -80,6 +81,30 @@ namespace phraktal
             }
 
             return false;
+        }
+         */
+        // todo: old code for destination navigation
+        /*
+        if (abs(this->pos.x - this->destination.x) <= abs(this->velocity.x * dTime * MAX_SPEED) + EPSILON)
+        {
+            this->velocity.x = 0;
+            this->pos.x = this->destination.x;
+            this->destination.x = 0;
+        }
+        else
+        {
+            this->pos.x += this->velocity.x * dTime * MAX_SPEED;
+        }
+
+        if (abs(this->pos.y - this->destination.y) <= abs(this->velocity.y * dTime * MAX_SPEED) + EPSILON)
+        {
+            this->velocity.y = 0;
+            this->pos.y = this->destination.y;
+            this->destination.y = 0;
+        }
+        else
+        {
+            this->pos.y += this->velocity.y * dTime * MAX_SPEED;
         }
          */
     }

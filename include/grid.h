@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "mimic.h"
+#include "mimics/mimic.h"
 
 class Grid
 {
