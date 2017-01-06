@@ -1,5 +1,5 @@
 ### TopDown is my experiment
-(Last updated 1/1/2017)
+(Last updated 1/6/2017)
 
 The main goals of this project is to hone my programming skills and to learn the necessary tools that often accompany programming, such as... git!
 
@@ -14,6 +14,7 @@ Current features being added (more or less in order):
 If you do manage to get this to run, as of writing the controls are:
 - WASD to move
 - Left Click to fire bullet
-- Right click to teleport
-- Q to spawn "enemy"
+- Right Click to teleport
+- Q to spawn "enemy" at pointer
+- O to spawn an additional random "enemy"
 - X to clear all "enemies"
