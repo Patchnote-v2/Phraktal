@@ -160,12 +160,12 @@ int main()
     while (!quit)
     {
         capTimer->start();
-        if (fpsTimer->getTicks() - secondCounter > 2000)
+        if (fpsTimer->getTicks() - secondCounter > 3000)
         {
             secondCounter = fpsTimer->getTicks();
             std::srand((uint) std::time(0));
-            int x = (std::rand() % phraktal::levels::SCREEN_WIDTH);
-            int y = (std::rand() % phraktal::levels::SCREEN_HEIGHT);
+            int x = (std::rand() % phraktal::levels::LEVEL_WIDTH);
+            int y = (std::rand() % phraktal::levels::LEVEL_HEIGHT);
             auto testEnemy = std::make_shared< Enemy >(camera);
             testEnemy->setRenderer(renderer);
             testEnemy->setTexture(phraktal::assets::ENEMY_PNG);
@@ -361,9 +361,20 @@ int main()
         SDL_SetRenderDrawColor(renderer.get(), 0x00, 0x00, 0x00, 0xFF);
         SDL_RenderClear(renderer.get());
 
+
         images["bg"]->renderTexture(0, 0, camera->getRect());
         images["fpsCounter"]->renderTexture(10, 10);
         images["stats"]->renderTexture(10, images["fpsCounter"]->getHeight() + 20);
+
+        auto rect = camera->getRect();
+        for (int w = 0; w < phraktal::levels::LEVEL_WIDTH / 32; w++)
+        {
+            SDL_RenderDrawLine(renderer.get(), w * 32 - rect->x, 0, w * 32 - rect->x, phraktal::levels::LEVEL_HEIGHT);
+        }
+        for (int h = 0; h < phraktal::levels::LEVEL_HEIGHT / 32; h++)
+        {
+            SDL_RenderDrawLine(renderer.get(), 0, h * 32 - rect->y, phraktal::levels::LEVEL_WIDTH, h * 32 - rect->y);
+        }
 
         // Render all mimics
         for (auto mimic : mimics)
