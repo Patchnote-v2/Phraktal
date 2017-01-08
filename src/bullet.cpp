@@ -19,7 +19,12 @@ void Bullet::setDestination(int x, int y)
     this->setDestination(destination);
 }
 
-bool Bullet::inLevel()
+void Bullet::setShotPower(int shotPower)
+{
+    this->maxSpeed += shotPower;
+}
+
+bool Bullet::isInLevel()
 {
     return !(this->pos.x < phraktal::levels::LEVEL_WIDTH + this->texture->getWidth() &&
             this->pos.x > 0 - this->texture->getWidth() &&
@@ -31,8 +36,8 @@ void Bullet::update(float dTime)
 {
     this->oldPos.x = this->pos.x;
     this->oldPos.y = this->pos.y;
-    this->pos.x += this->velocity.x * dTime * MAX_SPEED;
-    this->pos.y += this->velocity.y * dTime * MAX_SPEED;
+    this->pos.x += this->velocity.x * dTime * this->maxSpeed;
+    this->pos.y += this->velocity.y * dTime * this->maxSpeed;
 }
 
 void Bullet::render()

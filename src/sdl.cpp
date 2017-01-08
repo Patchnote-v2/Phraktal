@@ -149,13 +149,18 @@ int main()
 
     // todo: insert grid
 
+
+    // todo: temp
+    bool leftMouseButtonState = false;
+    int shotPower = 0;
+
     // Main loop
     SDL_Event e;
     bool quit = false;
     while (!quit)
     {
         capTimer->start();
-        if (fpsTimer->getTicks() - secondCounter > 1000)
+        if (fpsTimer->getTicks() - secondCounter > 2000)
         {
             secondCounter = fpsTimer->getTicks();
             std::srand((uint) std::time(0));
@@ -185,6 +190,18 @@ int main()
             {
                 if (e.button.button == SDL_BUTTON_LEFT)
                 {
+                    leftMouseButtonState = true;
+                }
+                else
+                {
+                    player->handleEvents(e);
+                }
+            }
+            if (e.type == SDL_MOUSEBUTTONUP)
+            {
+                if (e.button.button == SDL_BUTTON_LEFT)
+                {
+
                     int x, y;
                     SDL_GetMouseState(&x, &y);
                     x = x + (int) camera->pos.x;
@@ -194,12 +211,12 @@ int main()
                     bullet->setRenderer(renderer);
                     bullet->setTexture(phraktal::assets::PLAYER_BULLET_PNG);
                     bullet->setType(Type::PLAYER_BULLET);
+                    bullet->setShotPower(shotPower);
 
                     bullets.push_back(std::move(bullet));
-                }
-                else
-                {
-                    player->handleEvents(e);
+
+                    shotPower = 0;
+                    leftMouseButtonState = false;
                 }
             }
             if (e.type == SDL_KEYDOWN)
@@ -260,10 +277,17 @@ int main()
         statsText <<  "Y: " << player->getPos()->y << std::endl;
         statsText << "oX: " << player->getOldPos()->x << std::endl;
         statsText <<  "oY: " << player->getOldPos()->y << std::endl;
+        statsText << "Shot Power: " << shotPower << std::endl;
         images["stats"]->loadTextureFromText(statsText.str(), color, 250);
 
         // Delta time
         float dTime = deltaTimer->getTicks() / 1000.f;
+
+        // Charge show if LMB is held
+        if (leftMouseButtonState && shotPower < phraktal::levels::MAX_SHOT_POWER)
+        {
+            shotPower += 10;
+        }
 
         // Update all mimics
         for (auto mimic : mimics)
@@ -320,7 +344,7 @@ int main()
             }
 
             // Delete bullet if out of level
-            if (bullets[i]->inLevel())
+            if (bullets[i]->isInLevel())
             {
                 bullets.erase(bullets.begin() + i);
             }

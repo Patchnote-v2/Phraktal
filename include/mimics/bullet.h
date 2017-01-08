@@ -11,16 +11,17 @@ const std::string BULLET_PNG = "assets/bullet.png";
 class Bullet : public Mimic
 {
 public:
-    Bullet(Vector2 pos, std::shared_ptr< Camera > camera) : Mimic(camera) {this->pos = pos;};
+    Bullet(Vector2 pos, std::shared_ptr< Camera > camera) : Mimic(camera), maxSpeed(100) {this->pos = pos;};
     ~Bullet() {};
 
     void setDestination(Vector2 destination);
     void setDestination(int x, int y);
-    bool inLevel();
+    void setShotPower(int shotPower);
+    bool isInLevel();
     void update(float dTime) override;
     void render() override;
 
 private:
-    const int MAX_SPEED = 900;
+    int maxSpeed;
 };
 #endif

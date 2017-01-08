@@ -26,6 +26,8 @@ namespace phraktal
         const int SCREEN_HEIGHT = 720;
         const int TILE_SIZE = 32;
 
+        const int MAX_SHOT_POWER = 2000;
+
         const std::string LEVEL1_TXT = "assets/levels/level1.txt";
     }
 
