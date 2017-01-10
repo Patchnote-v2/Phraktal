@@ -7,6 +7,13 @@ TextureW::TextureW()
     this->tH = 0;
 }
 
+TextureW::~TextureW()
+{
+    this->clearRenderer();
+    this->clearFont();
+    this->clearTexture();
+}
+
 bool TextureW::setRenderer(std::shared_ptr< SDL_Renderer > ren)
 {
     if (ren == nullptr && this->isRendererSet())
@@ -47,7 +54,7 @@ void TextureW::clearRenderer()
 }
 
 bool TextureW::loadTexture(std::string filePath)
-{    
+{
     if (!this->isRendererSet())
     {
         Log::logSDLError(std::cout, "Renderer not set");
@@ -77,7 +84,7 @@ bool TextureW::loadTexture(std::string filePath)
 
         SDL_FreeSurface(surface);
     }
-    
+
     return this->texture != nullptr;
 }
 
@@ -144,7 +151,6 @@ bool TextureW::setFont(std::string fontFile, int fontSize)
 {
     if (!this->isFontSet())
     {
-        this->clearFont();
         this->font.reset(TTF_OpenFont(fontFile.c_str(), fontSize));
         if (this->font != nullptr)
         {
@@ -171,6 +177,7 @@ void TextureW::clearFont()
 {
     if (this->isFontSet())
     {
+        TTF_CloseFont(this->font.get());
         this->font = nullptr;
     }
 }
