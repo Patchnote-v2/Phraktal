@@ -154,6 +154,30 @@ int main()
     bool leftMouseButtonState = false;
     int shotPower = 0;
 
+    std::vector< std::unique_ptr< TextureW > > widthT;
+    std::vector< std::unique_ptr< TextureW > > heightT;
+
+    for (int w = 0; w < phraktal::levels::LEVEL_WIDTH / 32; w++)
+    {
+        std::unique_ptr< TextureW > wTex(new TextureW());
+        wTex->setRenderer(renderer);
+        if (wTex->setFont(phraktal::assets::DEFAULT_FONT, 16))
+        {
+            wTex->loadTextureFromText(std::to_string(w), color);
+            widthT.push_back(std::move(wTex));
+        }
+    }
+    for (int h = 0; h < phraktal::levels::LEVEL_HEIGHT / 32; h++)
+    {
+        std::unique_ptr< TextureW > hTex(new TextureW());
+        hTex->setRenderer(renderer);
+        if (hTex->setFont(phraktal::assets::DEFAULT_FONT, 16))
+        {
+            hTex->loadTextureFromText(std::to_string(h), color);
+            heightT.push_back(std::move(hTex));
+        }
+    }
+
     // Main loop
     SDL_Event e;
     bool quit = false;
@@ -369,10 +393,12 @@ int main()
         auto rect = camera->getRect();
         for (int w = 0; w < phraktal::levels::LEVEL_WIDTH / 32; w++)
         {
+            widthT[w]->renderTexture(w * 32 + 5 - rect->x, 0 + 5);
             SDL_RenderDrawLine(renderer.get(), w * 32 - rect->x, 0, w * 32 - rect->x, phraktal::levels::LEVEL_HEIGHT);
         }
         for (int h = 0; h < phraktal::levels::LEVEL_HEIGHT / 32; h++)
         {
+            heightT[h]->renderTexture(0 + 5, h * 32 + 5 - rect->y);
             SDL_RenderDrawLine(renderer.get(), 0, h * 32 - rect->y, phraktal::levels::LEVEL_WIDTH, h * 32 - rect->y);
         }
 
