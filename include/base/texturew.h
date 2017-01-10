@@ -16,6 +16,7 @@ class TextureW
 {
 public:
     TextureW();
+    ~TextureW();
     bool setRenderer(std::shared_ptr< SDL_Renderer > ren);
     bool isRendererSet();
     std::shared_ptr< SDL_Renderer > getRenderer();
