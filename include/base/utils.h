@@ -6,6 +6,7 @@
 #include <cfloat>
 #include <memory>
 #include <iostream>
+#include <camera.h>
 
 #include "SDL2/SDL.h"
 #include "SDL_ttf.h"
@@ -25,6 +26,7 @@ namespace phraktal
         const int SCREEN_WIDTH = 1280;
         const int SCREEN_HEIGHT = 720;
         const int TILE_SIZE = 32;
+        const int TILE_SIZE2 = 64;
 
         const int MAX_SHOT_POWER = 2000;
 

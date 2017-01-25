@@ -19,6 +19,7 @@
 #include "base/texturew.h"
 #include "base/timer.h"
 #include "base/vector2.h"
+#include "base/grid.h"
 #include "base/utils.h"
 
 // Game objects
@@ -108,13 +109,37 @@ int main()
     bg->setRenderer(renderer);
     bg->loadTexture(phraktal::assets::BG_PNG);
 
-    // Texture map
+    // Texture std::map
     images.insert(std::map< std::string, std::unique_ptr< TextureW > >::value_type("fpsCounter", std::move(fpsCounter)));
     images.insert(std::map< std::string, std::unique_ptr< TextureW > >::value_type("stats", std::move(stats)));
     images.insert(std::map< std::string, std::unique_ptr< TextureW > >::value_type("bg", std::move(bg)));
 
+    std::vector< std::unique_ptr< TextureW > > widthT;
+    std::vector< std::unique_ptr< TextureW > > heightT;
+
+    // Grid index textures
+    for (int w = 0; w < phraktal::levels::LEVEL_WIDTH / phraktal::levels::TILE_SIZE2; w++)
+    {
+        std::unique_ptr< TextureW > wTex(new TextureW());
+        wTex->setRenderer(renderer);
+        if (wTex->setFont(phraktal::assets::DEFAULT_FONT, 16))
+        {
+            wTex->loadTextureFromText(std::to_string(w), color);
+            widthT.push_back(std::move(wTex));
+        }
+    }
+    for (int h = 0; h < phraktal::levels::LEVEL_HEIGHT / phraktal::levels::TILE_SIZE2; h++)
+    {
+        std::unique_ptr< TextureW > hTex(new TextureW());
+        hTex->setRenderer(renderer);
+        if (hTex->setFont(phraktal::assets::DEFAULT_FONT, 16))
+        {
+            hTex->loadTextureFromText(std::to_string(h), color);
+            heightT.push_back(std::move(hTex));
+        }
+    }
     // Collision detection
-//    std::unique_ptr< SDL_Rect > windowBoundary(new SDL_Rect{0, 0, phraktal::levels::SCREEN_WIDTH, phraktal::levels::SCREEN_HEIGHT});
+    std::unique_ptr< Grid > grid(new Grid(phraktal::levels::LEVEL_WIDTH, phraktal::levels::LEVEL_HEIGHT, phraktal::levels::TILE_SIZE2));
 
 
     // Timers
@@ -154,36 +179,13 @@ int main()
     bool leftMouseButtonState = false;
     int shotPower = 0;
 
-    std::vector< std::unique_ptr< TextureW > > widthT;
-    std::vector< std::unique_ptr< TextureW > > heightT;
-
-    for (int w = 0; w < phraktal::levels::LEVEL_WIDTH / 32; w++)
-    {
-        std::unique_ptr< TextureW > wTex(new TextureW());
-        wTex->setRenderer(renderer);
-        if (wTex->setFont(phraktal::assets::DEFAULT_FONT, 16))
-        {
-            wTex->loadTextureFromText(std::to_string(w), color);
-            widthT.push_back(std::move(wTex));
-        }
-    }
-    for (int h = 0; h < phraktal::levels::LEVEL_HEIGHT / 32; h++)
-    {
-        std::unique_ptr< TextureW > hTex(new TextureW());
-        hTex->setRenderer(renderer);
-        if (hTex->setFont(phraktal::assets::DEFAULT_FONT, 16))
-        {
-            hTex->loadTextureFromText(std::to_string(h), color);
-            heightT.push_back(std::move(hTex));
-        }
-    }
-
     // Main loop
     SDL_Event e;
     bool quit = false;
     while (!quit)
     {
         capTimer->start();
+        grid->addMimic(player);
         if (fpsTimer->getTicks() - secondCounter > 3000)
         {
             secondCounter = fpsTimer->getTicks();
@@ -384,23 +386,25 @@ int main()
         // Render textures
         SDL_SetRenderDrawColor(renderer.get(), 0x00, 0x00, 0x00, 0xFF);
         SDL_RenderClear(renderer.get());
-
-
         images["bg"]->renderTexture(0, 0, camera->getRect());
+
+        // Grid
+        grid->render(renderer, camera);
+
+        // Grid indexes
+        auto rect = camera->getRect();
+        for (int w = 0; w < phraktal::levels::LEVEL_WIDTH / phraktal::levels::TILE_SIZE2; w++)
+        {
+            widthT[w]->renderTexture(w * phraktal::levels::TILE_SIZE2 + 5 - rect->x, 0 + 5);
+        }
+        for (int h = 0; h < phraktal::levels::LEVEL_HEIGHT / phraktal::levels::TILE_SIZE2; h++)
+        {
+            heightT[h]->renderTexture(0 + 5, h * phraktal::levels::TILE_SIZE2 + 5 - rect->y);
+        }
+
+        // Stats
         images["fpsCounter"]->renderTexture(10, 10);
         images["stats"]->renderTexture(10, images["fpsCounter"]->getHeight() + 20);
-
-        auto rect = camera->getRect();
-        for (int w = 0; w < phraktal::levels::LEVEL_WIDTH / 32; w++)
-        {
-            widthT[w]->renderTexture(w * 32 + 5 - rect->x, 0 + 5);
-            SDL_RenderDrawLine(renderer.get(), w * 32 - rect->x, 0, w * 32 - rect->x, phraktal::levels::LEVEL_HEIGHT);
-        }
-        for (int h = 0; h < phraktal::levels::LEVEL_HEIGHT / 32; h++)
-        {
-            heightT[h]->renderTexture(0 + 5, h * 32 + 5 - rect->y);
-            SDL_RenderDrawLine(renderer.get(), 0, h * 32 - rect->y, phraktal::levels::LEVEL_WIDTH, h * 32 - rect->y);
-        }
 
         // Render all mimics
         for (auto mimic : mimics)
