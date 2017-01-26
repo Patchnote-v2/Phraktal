@@ -1,5 +1,5 @@
 ### TopDown is my experiment
-(Last updated 1/25/2017)
+(Last updated 1/26/2017)
 
 The main goals of this project is to hone my programming skills and to learn the necessary tools that often accompany programming, such as git.  It's also an expiriment so see if game development is anything like what I'd like to do.  
 
