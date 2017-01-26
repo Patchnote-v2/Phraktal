@@ -139,7 +139,7 @@ int main()
         }
     }
     // Collision detection
-    std::unique_ptr< Grid > grid(new Grid(phraktal::levels::LEVEL_WIDTH, phraktal::levels::LEVEL_HEIGHT, phraktal::levels::TILE_SIZE2));
+    std::unique_ptr< Grid > grid(new Grid(phraktal::levels::LEVEL_WIDTH, phraktal::levels::LEVEL_HEIGHT, phraktal::levels::TILE_SIZE2, renderer));
 
 
     // Timers
@@ -169,11 +169,9 @@ int main()
     player->setTexture(phraktal::assets::PLAYER_PNG);
     player->setPos(550, 250);
     mimics.push_back(player);
+    grid->addMimic(player);
     // Bullets
-    std::vector< std::unique_ptr< Bullet > > bullets;
-
-    // todo: insert grid
-
+    std::vector< std::shared_ptr< Bullet > > bullets;
 
     // todo: temp
     bool leftMouseButtonState = false;
@@ -185,7 +183,7 @@ int main()
     while (!quit)
     {
         capTimer->start();
-        grid->addMimic(player);
+        /*
         if (fpsTimer->getTicks() - secondCounter > 3000)
         {
             secondCounter = fpsTimer->getTicks();
@@ -198,8 +196,10 @@ int main()
             testEnemy->setPos(x, y);
             testEnemy->setCurrentTarget(player);
             testEnemy->toggleActive();
+            grid->addMimic(testEnemy);
             mimics.push_back(testEnemy);
         }
+         */
         player->handleKeystates(keystates);
 
         while (SDL_PollEvent(&e))
@@ -232,14 +232,15 @@ int main()
                     SDL_GetMouseState(&x, &y);
                     x = x + (int) camera->pos.x;
                     y = y + (int) camera->pos.y;
-                    std::unique_ptr< Bullet > bullet(new Bullet(*(player->getCenter().get()), camera));
+                    auto bullet = std::make_shared< Bullet >(*(player->getCenter().get()), camera);
                     bullet->setDestination(x, y);
                     bullet->setRenderer(renderer);
                     bullet->setTexture(phraktal::assets::PLAYER_BULLET_PNG);
                     bullet->setType(Type::PLAYER_BULLET);
                     bullet->setShotPower(shotPower);
 
-                    bullets.push_back(std::move(bullet));
+                    grid->addMimic(bullet);
+                    bullets.push_back(bullet);
 
                     shotPower = 0;
                     leftMouseButtonState = false;
@@ -257,14 +258,20 @@ int main()
                     enemy->setPos(x + (int) camera->pos.x, y + (int) camera->pos.y);
                     enemy->setCurrentTarget(player);
                     enemy->toggleActive();
+                    grid->addMimic(enemy);
                     mimics.push_back(enemy);
-                    //todo insert grid
                 }
                 if (e.key.keysym.sym == SDLK_x)
                 {
                     mimics.clear();
                     mimics.shrink_to_fit();
                     mimics.push_back(player);
+                    grid->clear();
+                    grid->addMimic(player);
+                }
+                if (e.key.keysym.sym == SDLK_m)
+                {
+                    grid->removeMimic(player);
                 }
                 if (e.key.keysym.sym == SDLK_o)
                 {
@@ -279,6 +286,8 @@ int main()
                     testEnemy->setCurrentTarget(player);
                     testEnemy->toggleActive();
                     mimics.push_back(testEnemy);
+                    grid->addMimic(testEnemy);
+
                 }
             }
             if (e.type == SDL_KEYUP)
@@ -304,15 +313,22 @@ int main()
         statsText << "oX: " << player->getOldPos()->x << std::endl;
         statsText <<  "oY: " << player->getOldPos()->y << std::endl;
         statsText << "Shot Power: " << shotPower << std::endl;
+        statsText << "Num bullets: " << bullets.size() << std::endl;
         images["stats"]->loadTextureFromText(statsText.str(), color, 250);
 
         // Delta time
         float dTime = deltaTimer->getTicks() / 1000.f;
 
-        // Charge show if LMB is held
+        // Charge shot if LMB is held
         if (leftMouseButtonState && shotPower < phraktal::levels::MAX_SHOT_POWER)
         {
             shotPower += 10;
+        }
+
+        if (player->hasMoved())
+        {
+            std::cout << "Moved" << std::endl;
+            grid->updateMimic(player);
         }
 
         // Update all mimics
@@ -327,13 +343,14 @@ int main()
                 if ((int) derived->shotCooldown > 3)
                 {
                     derived->shotCooldown = 0;
-                    std::unique_ptr< Bullet > bullet(new Bullet(*(derived->getCenter().get()), camera));
+                    auto bullet = std::make_shared< Bullet >(*(derived->getCenter().get()), camera);
                     bullet->setDestination((int) player->getCenter()->x, (int) player->getCenter()->y);
                     bullet->setRenderer(renderer);
                     bullet->setTexture(phraktal::assets::ENEMY_BULLET_PNG);
                     bullet->setType(Type::ENEMY_BULLET);
 
-                    bullets.push_back(std::move(bullet));
+                    bullets.push_back(bullet);
+                    grid->addMimic(bullet);
                 }
             }
         }
@@ -342,6 +359,11 @@ int main()
         for (unsigned int i = 0; i < bullets.size(); i++)
         {
             bullets[i]->update(dTime);
+
+            if (bullets[i]->hasMoved())
+            {
+                grid->updateMimic(bullets[i]);
+            }
 
             // Player bullet collision check
             if (bullets[i]->getType() == Type::PLAYER_BULLET)
@@ -352,7 +374,9 @@ int main()
                     {
                         if (SDL_HasIntersection(bullets[i]->getRect().get(), mimics[n]->getRect().get()))
                         {
+                            grid->removeMimic(mimics[n]);
                             mimics.erase(mimics.begin() + n);
+                            grid->removeMimic(bullets[i]);
                             bullets.erase(bullets.begin() + i);
                             goto next;
                         }
@@ -372,6 +396,7 @@ int main()
             // Delete bullet if out of level
             if (bullets[i]->isInLevel())
             {
+                grid->removeMimic(bullets[i]);
                 bullets.erase(bullets.begin() + i);
             }
             next:;

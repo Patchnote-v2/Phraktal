@@ -88,17 +88,6 @@ void Player::update(float dTime)
         this->velocity.y = -MAX_Y_VEL;
     }
 
-    // Update old position
-    if ((int) this->pos.x != (int) this->oldPos.x)
-    {
-        this->oldPos.x = this->pos.x;
-    }
-    if ((int) this->pos.y != (int) this->oldPos.y)
-    {
-        this->oldPos.y = this->pos.y;
-    }
-
-
     if (this->keystates[SDL_SCANCODE_A])
     {
         this->velocity.x -= accelerationSpeed;
@@ -115,6 +104,9 @@ void Player::update(float dTime)
     {
         this->velocity.y += accelerationSpeed;
     }
+
+    this->oldPos.x = this->pos.x;
+    this->oldPos.y = this->pos.y;
 
     this->pos.x += this->velocity.x * (dTime);
     this->pos.y += this->velocity.y * (dTime);

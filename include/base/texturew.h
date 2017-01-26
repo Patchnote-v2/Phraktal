@@ -29,7 +29,7 @@ public:
     bool setFont(std::string fontFile, int fontSize);
     bool isFontSet();
     void clearFont();
-    void setFontColor(SDL_Color  color);
+    void setFontColor(SDL_Color color);
     void renderTexture(int x, int y, std::shared_ptr< SDL_Rect > clip = NULL, double angle = 0.0,
                        std::unique_ptr< SDL_Point > center = NULL,
                        SDL_RendererFlip flip = SDL_FLIP_NONE);
@@ -39,7 +39,7 @@ private:
     std::unique_ptr< TTF_Font, phraktal::utils::SDL_Deleter > font;
     std::unique_ptr< SDL_Texture, phraktal::utils::SDL_Deleter > texture;
     int w;
-    int tH;
+    int h;
 };
 
 #endif

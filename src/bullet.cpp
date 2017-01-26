@@ -36,6 +36,7 @@ void Bullet::update(float dTime)
 {
     this->oldPos.x = this->pos.x;
     this->oldPos.y = this->pos.y;
+
     this->pos.x += this->velocity.x * dTime * this->maxSpeed;
     this->pos.y += this->velocity.y * dTime * this->maxSpeed;
 }

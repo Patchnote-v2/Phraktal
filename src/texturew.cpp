@@ -4,7 +4,7 @@ TextureW::TextureW()
 {
     this->renderer.reset();
     this->w = 0;
-    this->tH = 0;
+    this->h = 0;
 }
 
 TextureW::~TextureW()
@@ -79,7 +79,7 @@ bool TextureW::loadTexture(std::string filePath)
         else
         {
             this->w = surface->w;
-            this->tH = surface->h;
+            this->h = surface->h;
         }
 
         SDL_FreeSurface(surface);
@@ -117,7 +117,7 @@ bool TextureW::loadTextureFromText(std::string text, SDL_Color color, int wrappe
         else
         {
             this->w = surface->w;
-            this->tH = surface->h;
+            this->h = surface->h;
         }
 
         SDL_FreeSurface(surface);
@@ -133,7 +133,7 @@ void TextureW::clearTexture()
         SDL_DestroyTexture(this->texture.get());
         this->texture = nullptr;
         this->w = 0;
-        this->tH = 0;
+        this->h = 0;
     }
 }
 
@@ -144,7 +144,7 @@ int TextureW::getWidth()
 
 int TextureW::getHeight()
 {
-    return this->tH;
+    return this->h;
 }
 
 bool TextureW::setFont(std::string fontFile, int fontSize)
@@ -186,7 +186,7 @@ void TextureW::clearFont()
 void TextureW::renderTexture(int x, int y, std::shared_ptr< SDL_Rect > clip, double angle,
                              std::unique_ptr< SDL_Point > center, SDL_RendererFlip flip)
 {
-    SDL_Rect destination = {x, y, this->w, this->tH};
+    SDL_Rect destination = {x, y, this->w, this->h};
 
     if (clip != NULL)
     {

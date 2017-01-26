@@ -55,7 +55,6 @@ Type Mimic::getType() const
 bool Mimic::hasMoved()
 {
     return ((int) this->pos.x != (int) this->oldPos.x) || ((int) this->pos.y != (int) this->oldPos.y);
-//    return (this->pos.x != this->oldPos.x || this->pos.y != this->oldPos.y);
 }
 
 bool Mimic::checkCollision(std::shared_ptr< Mimic > m2)
