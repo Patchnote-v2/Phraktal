@@ -8,12 +8,12 @@
 #include "mimic.h"
 #include "player.h"
 
-class Enemy : public Mimic
+class Enemy : public MoveableEntity
 {
 public:
     float shotCooldown;
 
-    Enemy(std::shared_ptr< Camera > camera) : Mimic(camera) {setType(Type::ENEMY);};
+    Enemy(std::shared_ptr< Camera > camera) : MoveableEntity(camera) {setType(Type::ENEMY);};
     void update(float dTime) override;
     void setPos(int x, int y);
     void toggleActive();

@@ -8,10 +8,10 @@
 
 const std::string BULLET_PNG = "assets/bullet.png";
 
-class Bullet : public Mimic
+class Bullet : public MoveableEntity
 {
 public:
-    Bullet(Vector2 pos, std::shared_ptr< Camera > camera) : Mimic(camera), maxSpeed(100) {this->pos = pos;};
+    Bullet(Vector2 pos, std::shared_ptr< Camera > camera) : MoveableEntity(camera), maxSpeed(100) {this->pos = pos;};
     ~Bullet() {};
 
     void setDestination(Vector2 destination);

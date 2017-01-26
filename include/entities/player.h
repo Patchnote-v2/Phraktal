@@ -13,7 +13,7 @@
 const int MAX_X_VEL = 512;
 const int MAX_Y_VEL = 512;
 
-class Player : public Mimic
+class Player : public MoveableEntity
 {
 public:
     Type type;
