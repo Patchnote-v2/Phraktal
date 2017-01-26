@@ -23,3 +23,4 @@ If the one person who reads this, actually wants to get it to run, and then proc
 - Q to spawn "enemy" at pointer
 - O to spawn an additional random "enemy"
 - X to clear all "enemies"
+- M removes the player from the grid
