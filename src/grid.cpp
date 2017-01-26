@@ -117,11 +117,7 @@ void Grid::render(std::shared_ptr< SDL_Renderer > renderer, std::shared_ptr< Cam
         {
             h->x -= camera->pos.x;
             h->y -= camera->pos.y;
-            if (this->grid[width][height].empty())
-            {
-                SDL_RenderFillRect(renderer.get(), h.get());
-            }
-            else
+            if (!this->grid[width][height].empty())
             {
                 SDL_RenderDrawRect(renderer.get(), h.get());
                 text.str("");

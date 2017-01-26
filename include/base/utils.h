@@ -38,6 +38,7 @@ namespace phraktal
         const std::string DEFAULT_FONT = "assets/fonts/sample.ttf";
 
         const std::string BG_PNG = "assets/images/bg.png";
+        const std::string POWERBAR_PNG = "assets/images/powerbar.png";
         const std::string PLAYER_PNG = "assets/images/player.png";
         const std::string ENEMY_PNG = "assets/images/enemy.png";
         const std::string PLAYER_BULLET_PNG = "assets/images/playerbullet.png";

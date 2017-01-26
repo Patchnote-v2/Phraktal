@@ -9,6 +9,7 @@
 #include <memory>
 #include <level.h>
 #include <ctime>
+#include "hudItem.h"
 
 #include "SDL2/SDL.h"
 #include "SDL_image.h"
@@ -92,22 +93,24 @@ int main()
 
     // Stats
     std::stringstream timeText;
-    std::unique_ptr<TextureW> fpsCounter(new TextureW());
+    std::unique_ptr< TextureW > fpsCounter(new TextureW());
     fpsCounter->setRenderer(renderer);
     fpsCounter->setFont(phraktal::assets::DEFAULT_FONT, 16);
 
     std::stringstream statsText;
-    std::unique_ptr<TextureW> stats(new TextureW());
+    std::unique_ptr< TextureW > stats(new TextureW());
     stats->setRenderer(renderer);
     stats->setFont(phraktal::assets::DEFAULT_FONT, 16);
 
     // Textures
-    std::map< std::string, std::unique_ptr<TextureW> > images;
+    std::map< std::string, std::unique_ptr< TextureW > > images;
     SDL_Color color = { 255, 255, 255, 255};
 
     std::unique_ptr< TextureW > bg(new TextureW());
     bg->setRenderer(renderer);
     bg->loadTexture(phraktal::assets::BG_PNG);
+
+    std::unique_ptr< HudItem > powerbar(new HudItem(renderer, phraktal::levels::SCREEN_WIDTH - 150, phraktal::levels::SCREEN_HEIGHT - 50, 20));
 
     // Texture std::map
     images.insert(std::map< std::string, std::unique_ptr< TextureW > >::value_type("fpsCounter", std::move(fpsCounter)));
@@ -143,15 +146,15 @@ int main()
 
 
     // Timers
-    std::unique_ptr<Timer> fpsTimer(new Timer());
+    std::unique_ptr< Timer > fpsTimer(new Timer());
     int countedFrames = 0;
     float averageFPS = 0.f;
     Uint32 secondCounter = 0;
     fpsTimer->start();
 
-    std::unique_ptr<Timer> capTimer(new Timer());
+    std::unique_ptr< Timer > capTimer(new Timer());
 
-    std::unique_ptr<Timer> deltaTimer(new Timer());
+    std::unique_ptr< Timer > deltaTimer(new Timer());
     deltaTimer->start();
 
     // Keystates
@@ -244,6 +247,7 @@ int main()
 
                     shotPower = 0;
                     leftMouseButtonState = false;
+                    powerbar->setLevel(0);
                 }
             }
             if (e.type == SDL_KEYDOWN)
@@ -310,10 +314,7 @@ int main()
         statsText.str("");
         statsText << "X: " << player->getPos()->x << std::endl;
         statsText <<  "Y: " << player->getPos()->y << std::endl;
-        statsText << "oX: " << player->getOldPos()->x << std::endl;
-        statsText <<  "oY: " << player->getOldPos()->y << std::endl;
         statsText << "Shot Power: " << shotPower << std::endl;
-        statsText << "Num bullets: " << bullets.size() << std::endl;
         images["stats"]->loadTextureFromText(statsText.str(), color, 250);
 
         // Delta time
@@ -322,7 +323,8 @@ int main()
         // Charge shot if LMB is held
         if (leftMouseButtonState && shotPower < phraktal::levels::MAX_SHOT_POWER)
         {
-            shotPower += 10;
+            shotPower += 100;
+            powerbar->incrementLevel();
         }
 
         if (player->hasMoved())
@@ -412,6 +414,7 @@ int main()
         SDL_SetRenderDrawColor(renderer.get(), 0x00, 0x00, 0x00, 0xFF);
         SDL_RenderClear(renderer.get());
         images["bg"]->renderTexture(0, 0, camera->getRect());
+        powerbar->render();
 
         // Grid
         grid->render(renderer, camera);
