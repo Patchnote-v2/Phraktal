@@ -1,54 +1,41 @@
-#ifndef MIMIC_H
-#define MIMIC_H
+#ifndef MOVEABLE_ENTITY_H
+#define MOVEABLE_ENTITY_H
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <cfloat>
 #include <memory>
 
-#include "SDL2/SDL.h"
-#include "base/texturew.h"
-#include "base/vector2.h"
-#include "base/utils.h"
-#include "level.h"
-#include "camera.h"
+#include "Entity.h"
 
 class Level;
 
 namespace phraktal
 {
-    class MoveableEntity
+    class MoveableEntity : public Entity
     {
     public:
-        MoveableEntity(std::shared_ptr< Camera > camera);
+        MoveableEntity(Camera& camera, int x, int y);
+        ~MoveableEntity(){};
 
-        ~MoveableEntity()
-        {};
+        void setDestination(Vector2 destination);
+        void setDestination(int x, int y);
 
-        Vector2 getOldPos();
-        bool hasMoved();
+        void setPos(int x, int y) override;
+        Vector2 getOldPos() const;
 
-        virtual bool checkCollision(std::shared_ptr< MoveableEntity > m2);
+        void setMaxSpeed(float maxSpeed);
 
-        virtual void handleEvents(SDL_Event&)
-        {};
-
-        virtual void update(float);
-
-        virtual void render();
+        bool hasMoved() const;
+        virtual void update(float dTime) override;
 
     protected:
-        Camera& camera;
-        std::unique_ptr< TextureW > texture;
         Vector2 oldPos;
-        Vector2 pos;
-        Vector2 center;
-        double angle;
-        Vector2 aim;
+
+        float maxSpeed;
 
         Vector2 velocity;
         Vector2 destination;
-
     };
 }
 #endif

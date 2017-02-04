@@ -1,16 +1,15 @@
-#ifndef TEXTUREW_H
-#define TEXTUREW_H
+#ifndef TOPDOWN_TEXTUREW_H
+#define TOPDOWN_TEXTUREW_H
 
-#include <stdlib.h>
-#include <iostream>
 #include <memory>
+#include <iostream>
 
 #include "SDL2/SDL.h"
-#include "SDL_image.h"
 #include "SDL_ttf.h"
+#include "SDL_image.h"
 
-#include "log.h"
-#include "utils.h"
+#include "Utils.h"
+#include "Log.h"
 
 class TextureW
 {
@@ -42,4 +41,4 @@ private:
     int h;
 };
 
-#endif
+#endif //TOPDOWN_TEXTUREW_H

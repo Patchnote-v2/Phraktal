@@ -4,29 +4,27 @@
 #include <vector>
 #include <set>
 
-#include "base/utils.h"
-#include "mimics/mimic.h"
+#include <SDL.h>
+#include <MoveableEntity.h>
 
-class Grid
+namespace phraktal
 {
-public:
-    std::vector< std::vector< std::set< std::shared_ptr< Mimic > > > > grid;
-    std::vector< std::vector< std::unique_ptr< SDL_Rect > > > rects;
-    std::vector< std::vector< std::unique_ptr< TextureW > > > stats;
-    Grid(int width, int height, int cellSize, std::shared_ptr< SDL_Renderer > renderer);
+    class Grid
+    {
+    public:
+        std::vector< std::vector< std::set< const Entity& > > > grid;
+        std::vector< std::vector< SDL_Rect > > rects;
 
-    void clear();
-    void addMimic(std::shared_ptr< Mimic > mimic);
-    void removeMimic(std::shared_ptr< Mimic > mimic);
-    void updateMimic(std::shared_ptr< Mimic > mimic);
-    void render(std::shared_ptr< SDL_Renderer > renderer, std::shared_ptr< Camera > camera);
-    std::set< Mimic > query(Mimic mimic);
+        Grid(const int width, const int height, const int cellSize);
+        void clear();
+        void addEntity(Entity const& entity);
+        void removeEntity(Entity const& entity);
+        void updateMoveableEntity(MoveableEntity const& mimic);
+        std::set< Entity > query(Entity mimic);
 
-private:
-
-
-    int width, height;
-    int cellSize;
-};
-
+    private:
+        int width, height;
+        int cellSize;
+    };
+}
 #endif

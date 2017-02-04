@@ -1,35 +1,68 @@
-#include "entities/mimic.h"
+#include "MoveableEntity.h"
 
-MoveableEntity::MoveableEntity(std::shared_ptr< Camera > camera) : camera(camera), texture(new TextureW()), oldPos(0.f, 0.f), pos(0.f, 0.f), center(0.f, 0.f), aim(0.f, 0.f), velocity(0.f, 0.f), destination(0.f, 0.f)
+MoveableEntity::MoveableEntity(Camera &camera, int x, int y) :
+        Entity(camera, x, y),
+        oldPos(0.0f, 0.0f),
+        velocity(0.0f, 0.0f),
+        destination(0.0f, 0.0f),
+        maxSpeed(1)
 {
-    this->center = {0, 0};
-    this->angle = 0.f;
+    this->type = Type::MOVEABLE_ENTITY;
 }
 
-
-Vector2 phraktal::MoveableEntity::getOldPos()
+void MoveableEntity::setDestination(Vector2 destination)
 {
-    return Vector2(this->oldPos);
+    this->destination = destination;
+    this->velocity.x = this->destination.x - this->pos.x;
+    this->velocity.y = this->destination.y - this->pos.y;
+    this->velocity.normalize();
+    this->updateAngle();
 }
 
-bool phraktal::MoveableEntity::hasMoved()
+void MoveableEntity::setDestination(int x, int y)
 {
-    return ((int) this->pos.x != (int) this->oldPos.x) || ((int) this->pos.y != (int) this->oldPos.y);
+    Vector2 destination((float) x, (float) y);
+    this->setDestination(destination);
 }
 
-bool phraktal::MoveableEntity::checkCollision(std::shared_ptr< MoveableEntity > m2)
+void MoveableEntity::setPos(int x, int y)
 {
-    std::unique_ptr< SDL_Rect > rect1 = this->getRect();
-    std::unique_ptr< SDL_Rect > rect2 = m2->getRect();
-    return SDL_HasIntersection(rect1.get(), rect2.get());
+    this->oldPos.x = this->pos.x;
+    this->oldPos.y = this->pos.y;
+    Entity::setPos(x, y);
 }
 
-void phraktal::MoveableEntity::update(float)
+Vector2 MoveableEntity::getOldPos() const
 {
-    //
+    return this->oldPos;
 }
 
-void phraktal::MoveableEntity::render()
+void MoveableEntity::setMaxSpeed(float maxSpeed)
 {
-    this->texture->renderTexture((int) this->pos.x - (int) this->camera->pos.x, (int) this->pos.y - (int) this->camera->pos.y, NULL, this->angle, NULL, SDL_FLIP_NONE);
+    this->maxSpeed = maxSpeed;
+}
+
+bool MoveableEntity::hasMoved() const
+{
+//    return ((int) this->pos.x != (int) this->oldPos.x) || ((int) this->pos.y != (int) this->oldPos.y);
+    if ((std::round(this->pos.x) != std::round(this->oldPos.x)) || (std::round(this->pos.y) != std::round(this->oldPos.y)))
+    {
+        std::cout << "--X: " << this->pos.x << " - " << std::round(this->pos.x) << std::endl;
+        std::cout << "--oX: " << this->oldPos.x << " - " << std::round(this->oldPos.x) << std::endl;
+        std::cout << "--Y: " << this->pos.y << " - " << std::round(this->pos.y) << std::endl;
+        std::cout << "--oY: " << this->oldPos.y << " - " << std::round(this->oldPos.y) << std::endl;
+    }
+
+    return (std::round(this->pos.x) != std::round(this->oldPos.x)) || (std::round(this->pos.y) != std::round(this->oldPos.y));
+}
+
+void MoveableEntity::update(float dTime)
+{
+    this->oldPos.x = this->pos.x;
+    this->oldPos.y = this->pos.y;
+
+    this->pos.x = std::round(this->pos.x + this->velocity.x * dTime * this->maxSpeed);
+    this->pos.y += this->velocity.y * dTime * this->maxSpeed;
+
+    Entity::update(dTime);
 }

@@ -1,12 +1,7 @@
 #ifndef TOPDOWN_UTILS_H
 #define TOPDOWN_UTILS_H
 
-#define PI 3.14159265
-
-#include <cfloat>
-#include <memory>
-#include <iostream>
-#include <camera.h>
+#include <string>
 
 #include "SDL2/SDL.h"
 #include "SDL_ttf.h"
@@ -15,6 +10,8 @@ namespace phraktal
 {
     namespace levels
     {
+        const float PI = 3.1415926;
+
         const Uint32 SCREEN_FPS = 60;
         const Uint32 SCREEN_TICKS_PER_FRAME = 1000 / SCREEN_FPS;
 
@@ -25,7 +22,7 @@ namespace phraktal
 //        const int LEVEL_HEIGHT = 480;
         const int SCREEN_WIDTH = 1280;
         const int SCREEN_HEIGHT = 720;
-        const int TILE_SIZE = 64;
+        const int TILE_SIZE = 100;
 
         const int DEFAULT_FONT_SIZE = 18;
 
@@ -36,7 +33,7 @@ namespace phraktal
 
     namespace assets
     {
-        const std::string DEFAULT_FONT = "assets/fonts/sample.ttf";
+        const std::string DEFAULT_FONT = "assets/images/sample.ttf";
 
         const std::string BG_PNG = "assets/images/bg.png";
         const std::string POWERBAR_PNG = "assets/images/powerbar.png";
@@ -62,10 +59,17 @@ namespace phraktal
     {
         struct SDL_Deleter
         {
-            void operator()(SDL_Window* win) const {SDL_DestroyWindow(win);}
-            void operator()(SDL_Renderer* ren) const {SDL_DestroyRenderer(ren);}
-            void operator()(SDL_Texture* tex) const {SDL_DestroyTexture(tex);}
-            void operator()(TTF_Font* font) const {TTF_CloseFont(font);}
+            void operator()(SDL_Window* win) const
+            { SDL_DestroyWindow(win); }
+
+            void operator()(SDL_Renderer* ren) const
+            { SDL_DestroyRenderer(ren); }
+
+            void operator()(SDL_Texture* tex) const
+            { SDL_DestroyTexture(tex); }
+
+            void operator()(TTF_Font* font) const
+            { TTF_CloseFont(font); }
         };
 
         /*
@@ -116,4 +120,4 @@ namespace phraktal
     }
 }
 
-#endif
+#endif //TOPDOWN_UTILS_H
