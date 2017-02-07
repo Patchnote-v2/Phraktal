@@ -1,7 +1,7 @@
 ### TopDown is my experiment
-(Last updated 2/3/2017)
+(Last updated 2/6/2017)
 
-After programming this and then rewriting a the majority of it, I've decided to take a break from this project and attempt to do a similarly-styled game using SFML instead.  We'll see how that goes, but I do hope to come back to this project.
+A recent rewrite has been finished, although now I am wondering about how efficient my grid collision detection is.  That is what I am currently working on. 
 
 The rewrite included the following:
 - A global Engine in charge of everything SDL2, such as initialization and the renderer.
