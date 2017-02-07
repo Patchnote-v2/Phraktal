@@ -1,5 +1,5 @@
-#ifndef TOPDOWN_ENEMY_H
-#define TOPDOWN_ENEMY_H
+#ifndef PHRAKTAL_ENEMY_H
+#define PHRAKTAL_ENEMY_H
 
 #include "MoveableEntity.h"
 #include "Player.h"
@@ -22,4 +22,4 @@ private:
 
 };
 
-#endif //TOPDOWN_ENEMY_H
+#endif //PHRAKTAL_ENEMY_H

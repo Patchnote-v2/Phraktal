@@ -1,5 +1,5 @@
-#ifndef TOPDOWN_TEXTUREW_H
-#define TOPDOWN_TEXTUREW_H
+#ifndef PHRAKTAL_TEXTUREW_H
+#define PHRAKTAL_TEXTUREW_H
 
 #include <memory>
 #include <iostream>
@@ -41,4 +41,4 @@ private:
     int h;
 };
 
-#endif //TOPDOWN_TEXTUREW_H
+#endif //PHRAKTAL_TEXTUREW_H

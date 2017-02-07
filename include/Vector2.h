@@ -1,5 +1,5 @@
-#ifndef TOPDOWN_VECTOR2_H
-#define TOPDOWN_VECTOR2_H
+#ifndef PHRAKTAL_VECTOR2_H
+#define PHRAKTAL_VECTOR2_H
 
 #include <cmath>
 
@@ -82,4 +82,4 @@ inline bool operator!=(Vector2 left, const Vector2 &right)
     return !(left == right);
 }
 
-#endif //TOPDOWN_VECTOR2_H
+#endif //PHRAKTAL_VECTOR2_H

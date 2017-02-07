@@ -1,5 +1,5 @@
-#ifndef TOPDOWN_TEXT_H_H
-#define TOPDOWN_TEXT_H_H
+#ifndef PHRAKTAL_TEXT_H_H
+#define PHRAKTAL_TEXT_H_H
 
 #include "Entity.h"
 
@@ -18,4 +18,4 @@ protected:
     void updateText(std::string text);
 };
 
-#endif //TOPDOWN_TEXT_H_H
+#endif //PHRAKTAL_TEXT_H_H

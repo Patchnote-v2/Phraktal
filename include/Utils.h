@@ -1,5 +1,5 @@
-#ifndef TOPDOWN_UTILS_H
-#define TOPDOWN_UTILS_H
+#ifndef PHRAKTAL_UTILS_H
+#define PHRAKTAL_UTILS_H
 
 #include <string>
 
@@ -120,4 +120,4 @@ namespace phraktal
     }
 }
 
-#endif //TOPDOWN_UTILS_H
+#endif //PHRAKTAL_UTILS_H

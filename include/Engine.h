@@ -1,5 +1,5 @@
-#ifndef TOPDOWN_ENGINE_H
-#define TOPDOWN_ENGINE_H
+#ifndef PHRAKTAL_ENGINE_H
+#define PHRAKTAL_ENGINE_H
 
 #include <functional>
 #include <iostream>
@@ -118,4 +118,4 @@ void Engine::renderEntityStatic(std::shared_ptr< T > entity)
                                    SDL_FLIP_NONE);
 }
 
-#endif //TOPDOWN_ENGINE_H
+#endif //PHRAKTAL_ENGINE_H

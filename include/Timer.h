@@ -1,5 +1,5 @@
-#ifndef TOPDOWN_TIMER_H
-#define TOPDOWN_TIMER_H
+#ifndef PHRAKTAL_TIMER_H
+#define PHRAKTAL_TIMER_H
 
 #include "SDL2/SDL.h"
 
@@ -32,4 +32,4 @@ private:
     bool paused;
 };
 
-#endif //TOPDOWN_TIMER_H
+#endif //PHRAKTAL_TIMER_H

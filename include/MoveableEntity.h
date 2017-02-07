@@ -1,5 +1,5 @@
-#ifndef TOPDOWN_MOVEABLEENTITY_H
-#define TOPDOWN_MOVEABLEENTITY_H
+#ifndef PHRAKTAL_MOVEABLEENTITY_H
+#define PHRAKTAL_MOVEABLEENTITY_H
 
 #include "Entity.h"
 
@@ -27,4 +27,4 @@ protected:
 
     float maxSpeed;
 };
-#endif //TOPDOWN_MOVEABLEENTITY_H
+#endif //PHRAKTAL_MOVEABLEENTITY_H

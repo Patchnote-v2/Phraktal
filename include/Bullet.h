@@ -1,5 +1,5 @@
-#ifndef TOPDOWN_BULLET_H
-#define TOPDOWN_BULLET_H
+#ifndef PHRAKTAL_BULLET_H
+#define PHRAKTAL_BULLET_H
 
 #include "MoveableEntity.h"
 
@@ -13,4 +13,4 @@ public:
     {};
 };
 
-#endif //TOPDOWN_BULLET_H
+#endif //PHRAKTAL_BULLET_H

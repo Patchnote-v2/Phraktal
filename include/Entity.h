@@ -1,5 +1,5 @@
-#ifndef TOPDOWN_ENTITY_H
-#define TOPDOWN_ENTITY_H
+#ifndef PHRAKTAL_ENTITY_H
+#define PHRAKTAL_ENTITY_H
 
 #include "TextureW.h"
 #include "Camera.h"
@@ -47,4 +47,4 @@ protected:
     void updateAngle();
 };
 
-#endif //TOPDOWN_ENTITY_H
+#endif //PHRAKTAL_ENTITY_H

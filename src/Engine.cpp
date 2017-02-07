@@ -20,7 +20,7 @@ Engine::Engine() :
     phraktal::utils::SDL_Deleter d;
     std::unique_ptr <SDL_Window, phraktal::utils::SDL_Deleter> window(
             SDL_CreateWindow(
-                    "TopDown", 100, 100, phraktal::levels::SCREEN_WIDTH, phraktal::levels::SCREEN_HEIGHT, SDL_WINDOW_SHOWN),
+                    "Phraktal", 100, 100, phraktal::levels::SCREEN_WIDTH, phraktal::levels::SCREEN_HEIGHT, SDL_WINDOW_SHOWN),
             d);
 
     if (window == nullptr)

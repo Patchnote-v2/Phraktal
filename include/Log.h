@@ -1,6 +1,6 @@
 
-#ifndef TOPDOWN_LOG_H
-#define TOPDOWN_LOG_H
+#ifndef PHRAKTAL_LOG_H
+#define PHRAKTAL_LOG_H
 
 class Log
 {
@@ -17,4 +17,4 @@ void Log::log(std::ostream& os, const std::string& msg)
     os << msg << " error: " << SDL_GetError() << std::endl;
 }
 
-#endif //TOPDOWN_LOG_H
+#endif //PHRAKTAL_LOG_H

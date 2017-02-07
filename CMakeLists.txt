@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.6)
-project(TopDown)
+project(Phraktal)
 
 # Use our modified FindSDL2* modules
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${TopDown_SOURCE_DIR}/cmake")
-set(BIN_DIR ${TopDown_SOURCE_DIR}/bin)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${Phraktal_SOURCE_DIR}/cmake")
+set(BIN_DIR ${Phraktal_SOURCE_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Bump up warning levels appropriately for clang, gcc & msvc and build in debug mode

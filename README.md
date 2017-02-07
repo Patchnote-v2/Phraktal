@@ -1,4 +1,4 @@
-### TopDown is my experiment
+### Phraktal is my experiment
 (Last updated 2/6/2017)
 
 A recent rewrite has been finished, although now I am wondering about how efficient my grid collision detection is.  That is what I am currently working on. 

@@ -1,5 +1,5 @@
-#ifndef TOPDOWN_CAMERA_H
-#define TOPDOWN_CAMERA_H
+#ifndef PHRAKTAL_CAMERA_H
+#define PHRAKTAL_CAMERA_H
 
 #include <cmath>
 #include <memory>
@@ -21,4 +21,4 @@ public:
     void update();
 };
 
-#endif //TOPDOWN_CAMERA_H
+#endif //PHRAKTAL_CAMERA_H

@@ -1,5 +1,5 @@
-#ifndef TOPDOWN_GRID_H
-#define TOPDOWN_GRID_H
+#ifndef PHRAKTAL_GRID_H
+#define PHRAKTAL_GRID_H
 
 #include <vector>
 #include <set>
@@ -30,4 +30,4 @@ private:
     int cellSize;
 };
 
-#endif //TOPDOWN_GRID_H
+#endif //PHRAKTAL_GRID_H

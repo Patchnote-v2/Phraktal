@@ -1,5 +1,5 @@
-#ifndef TOPDOWN_PLAYER_H
-#define TOPDOWN_PLAYER_H
+#ifndef PHRAKTAL_PLAYER_H
+#define PHRAKTAL_PLAYER_H
 
 #include <map>
 
@@ -30,4 +30,4 @@ private:
     std::map< SDL_Scancode, bool > keystates;
 };
 
-#endif //TOPDOWN_PLAYER_H
+#endif //PHRAKTAL_PLAYER_H
