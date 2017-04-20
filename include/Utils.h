@@ -42,6 +42,8 @@ namespace phraktal
         const std::string PLAYER_BULLET_PNG = "assets/images/playerbullet.png";
         const std::string ENEMY_BULLET_PNG = "assets/images/enemybullet.png";
 
+        const std::string SPREAD_POWERUP_PNG = "assets/images/spreadpowerup.png";
+
         const std::string VOID_PNG = "assets/images/void.png";
         const std::string GRASS_PNG = "assets/images/grass.png";
         const std::string STONE_PNG = "assets/images/stone.png";

@@ -1,4 +1,5 @@
 #include <sstream>
+#include <ctime>
 #include "Engine.h"
 
 /*
@@ -7,8 +8,9 @@
 
 Engine::Engine() :
         camera(0, 0, phraktal::levels::SCREEN_WIDTH, phraktal::levels::SCREEN_HEIGHT),
-        grid(phraktal::levels::LEVEL_WIDTH, phraktal::levels::LEVEL_HEIGHT, phraktal::levels::TILE_SIZE),
-        hitCounter(0)
+        enemiesKilled(0),
+        timesHit(0),
+        grid(phraktal::levels::LEVEL_WIDTH, phraktal::levels::LEVEL_HEIGHT, phraktal::levels::TILE_SIZE)
 {
     // Initialize SDL, IMG, and TTF libraries
     if (this->init() == 1)
@@ -99,6 +101,7 @@ void Engine::initText(std::shared_ptr< Text > text, int fontSize)
     text->texture->setFont(phraktal::assets::DEFAULT_FONT, fontSize);
     SDL_Color color = {255, 255, 255, 255};
     text->texture->loadTextureFromText(text->text, color);
+    this->text.push_back(text);
 }
 
 void Engine::updateText(std::shared_ptr< Text > text, std::string textStr)
@@ -106,6 +109,112 @@ void Engine::updateText(std::shared_ptr< Text > text, std::string textStr)
     SDL_Color color = {255, 255, 255, 255};
     text->updateText(textStr);
     text->texture->loadTextureFromText(textStr, color);
+}
+
+void Engine::handleEvents(SDL_Event& e)
+{
+    if (e.type == SDL_MOUSEMOTION)
+    {
+        player->handleEvents(e);
+    }
+    if (e.type == SDL_MOUSEBUTTONDOWN)
+    {
+        if (e.button.button == SDL_BUTTON_LEFT)
+        {
+            this->player->setChargingState(true);
+        }
+        else
+        {
+            player->handleEvents(e);
+        }
+    }
+    if (e.type == SDL_MOUSEBUTTONUP)
+    {
+        if (e.button.button == SDL_BUTTON_LEFT)
+        {
+            int x, y;
+            SDL_GetMouseState(&x, &y);
+            x = x + (int) this->camera.pos.x;
+            y = y + (int) this->camera.pos.y;
+            switch (this->player->getPowerupType())
+            {
+                case Powerup::PowerupType::NONE:
+                {
+                    auto singleBullet = std::make_shared< Bullet >(this->camera, (int) player->getCenter().x,
+                                                                   (int) player->getCenter().y,
+                                                                   this->player->getShotPower(),
+                                                                   Entity::Type::PLAYER_BULLET);
+                    this->initEntity(singleBullet, phraktal::assets::PLAYER_BULLET_PNG);
+                    singleBullet->setDestination(x, y);
+                    break;
+                }
+
+                case Powerup::PowerupType::SPREAD:
+                {
+                    auto bullet1 = std::make_shared< Bullet >(this->camera, (int) player->getCenter().x,
+                                                              (int) player->getCenter().y,
+                                                              this->player->getShotPower(),
+                                                              Entity::Type::PLAYER_BULLET);
+                    auto bullet2 = std::make_shared< Bullet >(this->camera, (int) player->getCenter().x,
+                                                              (int) player->getCenter().y,
+                                                              this->player->getShotPower(),
+                                                              Entity::Type::PLAYER_BULLET);
+                    auto bullet3 = std::make_shared< Bullet >(this->camera, (int) player->getCenter().x,
+                                                              (int) player->getCenter().y,
+                                                              this->player->getShotPower(),
+                                                              Entity::Type::PLAYER_BULLET);
+                    this->initEntity(bullet1, phraktal::assets::PLAYER_BULLET_PNG);
+                    this->initEntity(bullet2, phraktal::assets::PLAYER_BULLET_PNG);
+                    this->initEntity(bullet3, phraktal::assets::PLAYER_BULLET_PNG);
+                    bullet1->setVelocityFromAngle(this->player->getAngle());
+                    bullet2->setVelocityFromAngle(this->player->getAngle() - 5);
+                    bullet3->setVelocityFromAngle(this->player->getAngle() + 5);
+                    break;
+                }
+            }
+
+            this->player->setShotPower(0);
+            this->player->setChargingState(false);
+        }
+    }
+    if (e.type == SDL_KEYDOWN)
+    {
+        if (e.key.keysym.sym == SDLK_q)
+        {
+
+            int x, y;
+            SDL_GetMouseState(&x, &y);
+            auto enemy = std::make_shared< Enemy >(this->camera, x + (int) this->camera.pos.x,
+                                                   y + (int) this->camera.pos.y);
+            this->initEntity(enemy, phraktal::assets::ENEMY_PNG);
+            enemy->setCurrentTarget(player);
+            enemy->toggleActive();
+        }
+        if (e.key.keysym.sym == SDLK_x)
+        {
+            this->resetLevel();
+        }
+        if (e.key.keysym.sym == SDLK_o)
+        {
+            // Reserved for debugging
+            std::srand((uint) std::time(0));
+            int x = (std::rand() % phraktal::levels::SCREEN_WIDTH);
+            int y = (std::rand() % phraktal::levels::SCREEN_HEIGHT);
+            auto testEnemy = std::make_shared< Enemy >(this->camera, x, y);
+            this->initEntity(testEnemy, phraktal::assets::ENEMY_PNG);
+            testEnemy->setCurrentTarget(player);
+            testEnemy->toggleActive();
+        }
+        if (e.key.keysym.sym == SDLK_1)
+        {
+            // Spread powerup
+            int x, y;
+            SDL_GetMouseState(&x, &y);
+            auto powerup = std::make_shared< Powerup >(this->camera, x + (int) this->camera.pos.x,
+                                                       y + (int) this->camera.pos.y, Powerup::PowerupType::SPREAD);
+            this->initEntity(powerup, phraktal::assets::SPREAD_POWERUP_PNG);
+        }
+    }
 }
 
 void Engine::updateEntities(float dTime)
@@ -120,7 +229,8 @@ void Engine::updateEntities(float dTime)
             auto derived = std::dynamic_pointer_cast< Enemy >(entity);
             if ((int) derived->shotCooldown > 3)
             {
-                auto bullet = std::make_shared< Bullet >(camera, (int) derived->getCenter().x, (int) derived->getCenter().y, 200, Entity::Type::ENEMY_BULLET);
+                auto bullet = std::make_shared< Bullet >(camera, (int) derived->getCenter().x,
+                                                         (int) derived->getCenter().y, 200, Entity::Type::ENEMY_BULLET);
                 this->initEntity(bullet, phraktal::assets::ENEMY_BULLET_PNG);
                 bullet->setDestination((int) this->player->getCenter().x, (int) this->player->getCenter().y);
 
@@ -129,27 +239,104 @@ void Engine::updateEntities(float dTime)
                 this->bullets.push_back(bullet);
                 this->grid.addEntity(bullet);
             }
+        }
+    }
 
-            auto found = this->grid.query(entity);
-            if (found.size())
+    restart:;
+    for (auto entity : this->entities)
+    {
+        auto found = this->grid.query(entity);
+        if (found.size() > 1)
+        {
+            for (auto k = found.begin(); k != found.end(); k++)
             {
-                for (auto k = found.begin(); k != found.end(); k++)
+                for (auto l = k; l != found.end(); l++)
                 {
-                    for (auto l = k; l != found.end(); l++)
+                    if (k == l)
                     {
-                        if (k == l)
+                        continue;
+                    }
+                    else
+                    {
+                        // Player's bullets
+                        if (((l->get()->getType() == Entity::Type::PLAYER_BULLET) &&
+                             (k->get()->getType() == Entity::Type::ENEMY)) ||
+                            ((l->get()->getType() == Entity::Type::ENEMY) &&
+                             (k->get()->getType() == Entity::Type::PLAYER_BULLET)))
                         {
-                            continue;
-                        }
-                        else
-                        {
-                            if ((l->get()->getType() == Entity::Type::ENEMY ||
-                                    l->get()->getType() == Entity::Type::PLAYER_BULLET))
+                            if (k->get()->isColliding(*l))
                             {
-                                if (k->get()->isColliding(*l))
-                                {
-                                    this->hitCounter++;
-                                }
+                                this->entities.erase(std::remove(this->entities.begin(), this->entities.end(), *l),
+                                                     this->entities.end());
+                                this->entities.erase(std::remove(this->entities.begin(), this->entities.end(), *k),
+                                                     this->entities.end());
+                                this->bullets.erase(std::remove(this->bullets.begin(), this->bullets.end(), *l),
+                                                    this->bullets.end());
+                                this->bullets.erase(std::remove(this->bullets.begin(), this->bullets.end(), *k),
+                                                    this->bullets.end());
+                                this->grid.removeEntity(*l);
+                                this->grid.removeEntity(*k);
+                                enemiesKilled++;
+                                goto restart;
+                            }
+                        }
+
+                            // Enemy's bullets
+                        else if (((l->get()->getType() == Entity::Type::ENEMY_BULLET) &&
+                                  (k->get()->getType() == Entity::Type::PLAYER)))
+                        {
+                            if (k->get()->isColliding(*l))
+                            {
+                                this->entities.erase(std::remove(this->entities.begin(), this->entities.end(), *l),
+                                                     this->entities.end());
+                                this->bullets.erase(std::remove(this->bullets.begin(), this->bullets.end(), *l),
+                                                    this->bullets.end());
+                                this->grid.removeEntity(*l);
+                                timesHit++;
+                                goto restart;
+                            }
+                        }
+                        else if (((l->get()->getType() == Entity::Type::PLAYER) &&
+                                  (k->get()->getType() == Entity::Type::ENEMY_BULLET)))
+                        {
+                            if (k->get()->isColliding(*l))
+                            {
+                                this->entities.erase(std::remove(this->entities.begin(), this->entities.end(), *k),
+                                                     this->entities.end());
+                                this->bullets.erase(std::remove(this->bullets.begin(), this->bullets.end(), *k),
+                                                    this->bullets.end());
+                                this->grid.removeEntity(*k);
+                                timesHit++;
+                                goto restart;
+                            }
+                        }
+                            // Powerup
+                        else if (l->get()->getType() == Entity::Type::POWERUP)
+                        {
+                            if (l->get()->isColliding(this->player))
+                            {
+                                this->player->setPowerupType(
+                                        std::dynamic_pointer_cast< Powerup >(*l)
+                                                ->getPowerupType()
+                                                            );
+                                this->entities.erase(std::remove(this->entities.begin(), this->entities.end(), *l), this->entities.end());
+                                this->bullets.erase(std::remove(this->bullets.begin(), this->bullets.end(), *l), this->bullets.end());
+                                this->grid.removeEntity(*l);
+                                goto restart;
+                            }
+                        }
+                        else if (k->get()->getType() == Entity::Type::POWERUP)
+                        {
+                            if (k->get()->isColliding(this->player))
+                            {
+                                this->player->setPowerupType(
+                                        std::dynamic_pointer_cast< Powerup >(*k)
+                                                ->getPowerupType()
+                                                            );
+                                this->entities.erase(std::remove(this->entities.begin(), this->entities.end(), *k), this->entities.end());
+                                this->bullets.erase(std::remove(this->bullets.begin(), this->bullets.end(), *k), this->bullets.end());
+                                this->grid.removeEntity(*k);
+                                goto restart;
                             }
                         }
                     }
@@ -168,28 +355,40 @@ void Engine::updateEntities(float dTime)
     }
 }
 
-
-
 void Engine::renderEntities()
 {
     for (auto entity : this->entities)
     {
         this->renderEntity(entity);
     }
-    this->grid.render(this->renderer, this->camera);
     for (auto bullet : this->bullets)
     {
         this->renderEntity(bullet);
     }
     this->renderEntity(this->player);
+    for (auto text : this->text)
+    {
+        this->renderEntityStatic(text);
+    }
 }
 
-std::string Engine::getVectorStats() const
+void Engine::renderRectangleOutline(SDL_Rect rect)
+{
+    SDL_RenderDrawRect(this->renderer.get(), &rect);
+}
+
+void Engine::renderRectangleFilled(SDL_Rect rect)
+{
+    SDL_RenderFillRect(this->renderer.get(), &rect);
+}
+
+std::string Engine::getStats() const
 {
     std::stringstream string;
     string << "Entities: " << this->entities.size() << std::endl;
     string << "Bullets: " << this->bullets.size() << std::endl;
-    string << "Hits: " << this->hitCounter << std::endl;
+    string << "Killed: " << this->enemiesKilled << std::endl;
+    string << "Hit: " << this->timesHit << std::endl;
     return string.str();
 }
 

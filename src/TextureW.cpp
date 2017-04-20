@@ -150,7 +150,6 @@ int TextureW::getHeight()
 
 bool TextureW::setFont(std::string fontFile, int fontSize)
 {
-    auto temp = TTF_OpenFont(fontFile.c_str(), fontSize);
     this->font.reset(TTF_OpenFont(fontFile.c_str(), fontSize));
     if (this->font != nullptr)
     {

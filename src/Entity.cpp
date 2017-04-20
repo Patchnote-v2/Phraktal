@@ -55,6 +55,18 @@ Entity::Type Entity::getType() const
     return this->type;
 }
 
+int Entity::getAngle() const
+{
+    int angle = (int) (std::atan2(this->center.y + this->camera.pos.y - (this->aim.y + this->camera.pos.y),
+                                     this->center.x + this->camera.pos.x - (this->aim.x + this->camera.pos.x)) * (180 / phraktal::levels::PI)) - 90;
+    if (angle < 0)
+    {
+        angle = 360 - (-angle);
+    }
+
+    return angle;
+}
+
 bool Entity::isInLevel()
 {
     return this->pos.x < phraktal::levels::LEVEL_WIDTH + this->texture->getWidth() &&

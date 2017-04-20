@@ -9,7 +9,15 @@ class Entity
 public:
     enum class Type
     {
-        SIMPLE_ENTITY, MOVEABLE_ENTITY, BACKGROUND_ENTITY, TEXT, PLAYER, ENEMY, PLAYER_BULLET, ENEMY_BULLET
+        SIMPLE_ENTITY,
+        MOVEABLE_ENTITY,
+        BACKGROUND_ENTITY,
+        TEXT,
+        PLAYER,
+        ENEMY,
+        PLAYER_BULLET,
+        ENEMY_BULLET,
+        POWERUP
     };
 
     Entity(Camera &camera, int x, int y);
@@ -23,6 +31,7 @@ public:
     Vector2 getPos() const;
     Vector2 getCenter() const;
     Entity::Type getType() const;
+    int getAngle() const;
 
     bool isInLevel();
 

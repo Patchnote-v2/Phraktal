@@ -1,6 +1,7 @@
 #ifndef PHRAKTAL_ENGINE_H
 #define PHRAKTAL_ENGINE_H
 
+#include <algorithm>
 #include <functional>
 #include <iostream>
 
@@ -35,6 +36,8 @@ public:
 //    void initEntity(std::shared_ptr< Bullet > entity, std::string textureName);
     void initText(std::shared_ptr< Text > text, int fontSize);
 
+    void handleEvents(SDL_Event& e);
+
     void updateText(std::shared_ptr< Text > text, std::string textStr);
     void updateEntities(float dTime);
 
@@ -45,10 +48,14 @@ public:
     template<typename T>
     void renderEntityStatic(std::shared_ptr< T > entity);
 
-    std::string getVectorStats() const;
+    void renderRectangleOutline(SDL_Rect rect);
+    void renderRectangleFilled(SDL_Rect rect);
+
+    std::string getStats() const;
 
 private:
-    int hitCounter;
+    int enemiesKilled;
+    int timesHit;
 
     std::unique_ptr <SDL_Window, phraktal::utils::SDL_Deleter> window;
     std::shared_ptr< SDL_Renderer > renderer;
@@ -57,6 +64,7 @@ private:
     std::shared_ptr< Player > player;
     std::vector< std::shared_ptr< Entity > > entities;
     std::vector< std::shared_ptr< Bullet > > bullets;
+    std::vector< std::shared_ptr< Text > > text;
 
     int init();
     void quitSDL();
@@ -69,21 +77,27 @@ void Engine::initEntity(std::shared_ptr< T > entity, std::string textureName)
     entity->texture->setRenderer(this->renderer);
     entity->loadTexture(textureName);
 
-    if (entity->getType() == Entity::Type::PLAYER)
+    auto type = entity->getType();
+
+    if (type == Entity::Type::PLAYER)
     {
         this->player = std::dynamic_pointer_cast< Player >(entity);
         this->entities.push_back(entity);
     }
-    else if (entity->getType() == Entity::Type::ENEMY)
+    else if (type == Entity::Type::POWERUP)
     {
         this->entities.push_back(entity);
     }
-    else if (entity->getType() == Entity::Type::PLAYER_BULLET ||
-            entity->getType() == Entity::Type::ENEMY_BULLET)
+    else if (type == Entity::Type::ENEMY)
+    {
+        this->entities.push_back(entity);
+    }
+    else if (type == Entity::Type::PLAYER_BULLET ||
+            type == Entity::Type::ENEMY_BULLET)
     {
         this->bullets.push_back(std::dynamic_pointer_cast< Bullet >(entity));
     }
-    else if (entity->getType() == Entity::Type::BACKGROUND_ENTITY)
+    else if (type == Entity::Type::BACKGROUND_ENTITY)
     {
         entity->aim.x = entity->center.x;
         return;

@@ -13,3 +13,12 @@ Bullet::Bullet(Camera &camera, int x, int y, float maxSpeed, Entity::Type type) 
     }
     this->type = type;
 }
+
+void Bullet::setVelocityFromAngle(int angle)
+{
+    float radians = (phraktal::levels::PI / 180 * angle);
+    radians -= phraktal::levels::PI / 2;
+    this->velocity.x = (int) (cos(radians) * this->maxSpeed);
+    this->velocity.y = (int) (sin(radians) * this->maxSpeed);
+    this->velocity.normalize();
+}

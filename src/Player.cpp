@@ -3,7 +3,8 @@
 Player::Player(Camera &camera, int x, int y) :
         MoveableEntity(camera, x, y),
         accelerationSpeed(30.0f),
-        decelerationSpeed(0.70f)
+        decelerationSpeed(0.70f),
+        powerupType(Powerup::PowerupType::NONE)
 {
     this->type = Type::PLAYER;
 
@@ -144,4 +145,39 @@ void Player::update(float dTime)
         this->pos.y = phraktal::levels::LEVEL_HEIGHT - this->texture->getHeight();
         this->velocity.y = -this->velocity.y;
     }
+}
+
+void Player::setPowerupType(Powerup::PowerupType powerupType)
+{
+    this->powerupType = powerupType;
+}
+
+Powerup::PowerupType Player::getPowerupType() const
+{
+    return this->powerupType;
+}
+
+void Player::removePowerup()
+{
+    this->powerupType = Powerup::PowerupType::NONE;
+}
+
+void Player::setShotPower(int shotPower)
+{
+    this->shotPower = shotPower;
+}
+
+int Player::getShotPower() const
+{
+    return this->shotPower;
+}
+
+void Player::setChargingState(bool isCharging)
+{
+    this->isCharging = !this->isCharging;
+}
+
+bool Player::getChargingState()
+{
+    return this->isCharging;
 }
