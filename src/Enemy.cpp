@@ -11,8 +11,8 @@ void Enemy::update(float dTime)
 {
     if (this->currentTarget)
     {
-        this->aim.x = this->currentTarget->getPos().x;
-        this->aim.y = this->currentTarget->getPos().y;
+        this->aim.x = this->currentTarget->getCenter().x;
+        this->aim.y = this->currentTarget->getCenter().y;
     }
 
     MoveableEntity::update(dTime);
