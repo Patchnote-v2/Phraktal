@@ -118,33 +118,3 @@ std::set< std::shared_ptr< Entity > > Grid::query(std::shared_ptr< Entity > enti
     return found;
 }
 
-
-void Grid::render(std::shared_ptr< SDL_Renderer > renderer, Camera &camera)
-{
-    int width = 0, height = 0;
-    std::stringstream text;
-    text.str("");
-    SDL_Color color{255, 255, 255, 255};
-
-    for (auto &w : this->rects)
-    {
-        for (auto &h : w)
-        {
-            h.x -= camera.pos.x;
-            h.y -= camera.pos.y;
-            if (!this->grid[width][height].empty())
-            {
-                SDL_RenderDrawRect(renderer.get(), &h);
-                text.str("");
-                text << this->grid[width][height].size();
-                this->stats[width][height]->loadTextureFromText(text.str(), color);
-                this->stats[width][height]->renderTexture(h.x + 5, h.y + 5);
-            }
-            h.x += camera.pos.x;
-            h.y += camera.pos.y;
-            height++;
-        }
-        width++;
-        height = 0;
-    }
-}

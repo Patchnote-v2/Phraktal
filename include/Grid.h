@@ -23,8 +23,6 @@ public:
     void removeEntity(std::shared_ptr< Entity > entity);
     std::set< std::shared_ptr< Entity > > query(std::shared_ptr< Entity > mimic);
 
-    void render(std::shared_ptr< SDL_Renderer > renderer, Camera &camera);
-
 private:
     int width, height;
     int cellSize;
