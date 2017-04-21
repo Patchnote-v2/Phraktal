@@ -9,7 +9,8 @@ public:
     enum class PowerupType
     {
         NONE,
-        SPREAD
+        SPREAD,
+        LARGE
     };
     Powerup(Camera &camera, int x, int y, PowerupType powerupType);
     ~Powerup() {};

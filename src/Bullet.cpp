@@ -14,6 +14,14 @@ Bullet::Bullet(Camera &camera, int x, int y, float maxSpeed, Entity::Type type) 
     this->type = type;
 }
 
+void Bullet::setDestination(int x, int y)
+{
+    MoveableEntity::setDestination(x, y);
+    this->aim.x = x;
+    this->aim.y = y;
+    this->updateAngle();
+}
+
 void Bullet::setVelocityFromAngle(int angle)
 {
     float radians = (phraktal::levels::PI / 180 * angle);
@@ -21,4 +29,15 @@ void Bullet::setVelocityFromAngle(int angle)
     this->velocity.x = (int) (cos(radians) * this->maxSpeed);
     this->velocity.y = (int) (sin(radians) * this->maxSpeed);
     this->velocity.normalize();
+}
+
+void Bullet::update(float dTime)
+{
+    this->oldPos.x = this->pos.x;
+    this->oldPos.y = this->pos.y;
+
+    this->pos.x += this->velocity.x * dTime * this->maxSpeed;
+    this->pos.y += this->velocity.y * dTime * this->maxSpeed;
+
+    this->updateCenter();
 }

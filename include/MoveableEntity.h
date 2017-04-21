@@ -11,7 +11,7 @@ public:
     ~MoveableEntity(){};
 
     void setDestination(Vector2 destination);
-    void setDestination(int x, int y);
+    virtual void setDestination(int x, int y);
     void setPos(int x, int y) override;
     Vector2 getOldPos() const;
     void setMaxSpeed(float maxSpeed);

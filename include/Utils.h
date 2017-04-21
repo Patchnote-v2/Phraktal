@@ -26,7 +26,13 @@ namespace phraktal
 
         const int DEFAULT_FONT_SIZE = 18;
 
-        const int MAX_SHOT_POWER = 2000;
+        const int MAX_REGULAR_SHOT_SPEED = 1000;
+        const int MAX_SPREAD_SHOT_SPEED = 2000;
+        const int MAX_LARGE_SHOT_SPEED = 500;
+
+        const int REGULAR_SHOT_COOLDOWN = 500;
+        const int SPREAD_SHOT_COOLDOWN = 250;
+        const int LARGE_SHOT_COOLDOWN = 750;
 
         const std::string LEVEL1_TXT = "assets/levels/level1.txt";
     }
@@ -40,9 +46,12 @@ namespace phraktal
         const std::string PLAYER_PNG = "assets/images/player.png";
         const std::string ENEMY_PNG = "assets/images/enemy.png";
         const std::string PLAYER_BULLET_PNG = "assets/images/playerbullet.png";
+        const std::string SPREAD_PLAYER_BULLET_PNG = "assets/images/spreadplayerbullet.png";
+        const std::string LARGE_PLAYER_BULLET_PNG = "assets/images/largeplayerbullet.png";
         const std::string ENEMY_BULLET_PNG = "assets/images/enemybullet.png";
 
         const std::string SPREAD_POWERUP_PNG = "assets/images/spreadpowerup.png";
+        const std::string LARGE_BULLET_POWERUP_PNG = "assets/images/largebulletpowerup.png";
 
         const std::string VOID_PNG = "assets/images/void.png";
         const std::string GRASS_PNG = "assets/images/grass.png";

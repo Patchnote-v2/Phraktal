@@ -12,7 +12,11 @@ public:
     Bullet(Camera &camera, int x, int y, float maxSpeed, Entity::Type type);
     ~Bullet() {};
 
+    virtual void setDestination(int x, int y) override;
+
     void setVelocityFromAngle(int angle);
+
+    void update(float) override;
 };
 
 #endif //PHRAKTAL_BULLET_H

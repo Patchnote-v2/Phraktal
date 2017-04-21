@@ -53,12 +53,8 @@ int main()
     // todo: HUD items
 
     // Shot power bar
-    SDL_Rect* filled = new SDL_Rect{phraktal::levels::SCREEN_WIDTH - 210, 10, 0, 25};
-    SDL_Rect* barOutline = new SDL_Rect{phraktal::levels::SCREEN_WIDTH - 211, 10, 201, 26};
-
-    auto testText = std::make_shared< Text >(engine.camera, 100, 100);
-    engine.initText(testText, 25);
-    engine.updateText(testText, "Hey, Vsauce!  Michael here.");
+    SDL_Rect* filled = new SDL_Rect{phraktal::levels::SCREEN_WIDTH - 311, 11, 0, 35};
+    SDL_Rect* barOutline = new SDL_Rect{phraktal::levels::SCREEN_WIDTH - 312, 10, 301, 37};
 
     // Keystates
     const Uint8* keystates = SDL_GetKeyboardState(NULL);
@@ -122,20 +118,16 @@ int main()
 
         // Stats
         statsText.str("");
-        statsText << "X: " << player->getPos().x << std::endl;
-        statsText << "Y: " << player->getPos().y << std::endl;
-        statsText << "Shot Power: " << shotPower << std::endl;
         statsText << engine.getStats();
+        statsText << "Width: " << filled->w << std::endl;
         engine.updateText(stats, statsText.str());
 
         // Delta time
         float dTime = deltaTimer.getTicks() / 1000.f;
 
-        // Charge shot if LMB is held
-        filled->w = player->getShotPower() / 10;
-        if (player->getChargingState() && player->getShotPower() < phraktal::levels::MAX_SHOT_POWER)
+        if (player->getShotCooldown() != 0)
         {
-            player->setShotPower(player->getShotPower() + 100);
+            filled->w = (int) (((float) player->getShotCooldown() / (float) player->getMaxShotCooldownTime()) * 100.f) * 3;
         }
 
         // Update all entities
@@ -154,7 +146,16 @@ int main()
         engine.renderEntities();
 
         // Powerbar
+        if (player->canFire())
+        {
+            engine.setDrawColor(0, 255, 0, 255);
+        }
+        else
+        {
+            engine.setDrawColor(255, 0, 0, 255);
+        }
         engine.renderRectangleFilled(*filled);
+        engine.setDrawColor(255, 255, 255, 255);
         engine.renderRectangleOutline(*barOutline);
 
         engine.rendererPresent();

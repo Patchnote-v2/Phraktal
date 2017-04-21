@@ -4,7 +4,9 @@ Player::Player(Camera &camera, int x, int y) :
         MoveableEntity(camera, x, y),
         accelerationSpeed(30.0f),
         decelerationSpeed(0.70f),
-        powerupType(Powerup::PowerupType::NONE)
+        powerupType(Powerup::PowerupType::NONE),
+        shotCooldown(0),
+        maxShotCooldownTime(phraktal::levels::REGULAR_SHOT_COOLDOWN)
 {
     this->type = Type::PLAYER;
 
@@ -145,11 +147,41 @@ void Player::update(float dTime)
         this->pos.y = phraktal::levels::LEVEL_HEIGHT - this->texture->getHeight();
         this->velocity.y = -this->velocity.y;
     }
+
+    // Shot cooldown
+    if (this->shotCooldown < this->maxShotCooldownTime)
+    {
+        this->shotCooldown += dTime * 1000;
+    }
+    if (this->shotCooldown > this->maxShotCooldownTime)
+    {
+        this->shotCooldown = this->maxShotCooldownTime;
+    }
 }
 
 void Player::setPowerupType(Powerup::PowerupType powerupType)
 {
     this->powerupType = powerupType;
+    switch (this->powerupType)
+    {
+        case Powerup::PowerupType::NONE:
+        {
+            this->maxShotCooldownTime = phraktal::levels::REGULAR_SHOT_COOLDOWN;
+            break;
+        }
+
+        case Powerup::PowerupType::SPREAD:
+        {
+            this->maxShotCooldownTime = phraktal::levels::SPREAD_SHOT_COOLDOWN;
+            break;
+        }
+
+        case Powerup::PowerupType::LARGE:
+        {
+            this->maxShotCooldownTime = phraktal::levels::LARGE_SHOT_COOLDOWN;
+            break;
+        }
+    }
 }
 
 Powerup::PowerupType Player::getPowerupType() const
@@ -160,24 +192,25 @@ Powerup::PowerupType Player::getPowerupType() const
 void Player::removePowerup()
 {
     this->powerupType = Powerup::PowerupType::NONE;
+    this->maxShotCooldownTime = phraktal::levels::REGULAR_SHOT_COOLDOWN;
 }
 
-void Player::setShotPower(int shotPower)
+void Player::resetShotCooldown()
 {
-    this->shotPower = shotPower;
+    this->shotCooldown = 0;
 }
 
-int Player::getShotPower() const
+int Player::getShotCooldown() const
 {
-    return this->shotPower;
+    return this->shotCooldown;
 }
 
-void Player::setChargingState(bool isCharging)
+int Player::getMaxShotCooldownTime() const
 {
-    this->isCharging = !this->isCharging;
+    return this->maxShotCooldownTime;
 }
 
-bool Player::getChargingState()
+bool Player::canFire() const
 {
-    return this->isCharging;
+    return this->shotCooldown >= this->maxShotCooldownTime;
 }

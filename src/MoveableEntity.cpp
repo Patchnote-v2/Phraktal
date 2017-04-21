@@ -61,7 +61,7 @@ void MoveableEntity::update(float dTime)
     this->oldPos.x = this->pos.x;
     this->oldPos.y = this->pos.y;
 
-    this->pos.x = std::round(this->pos.x + this->velocity.x * dTime * this->maxSpeed);
+    this->pos.x += this->velocity.x * dTime * this->maxSpeed;
     this->pos.y += this->velocity.y * dTime * this->maxSpeed;
 
     Entity::update(dTime);

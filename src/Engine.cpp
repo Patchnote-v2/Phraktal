@@ -119,62 +119,69 @@ void Engine::handleEvents(SDL_Event& e)
     }
     if (e.type == SDL_MOUSEBUTTONDOWN)
     {
-        if (e.button.button == SDL_BUTTON_LEFT)
-        {
-            this->player->setChargingState(true);
-        }
-        else
-        {
-            player->handleEvents(e);
-        }
+        player->handleEvents(e);
     }
     if (e.type == SDL_MOUSEBUTTONUP)
     {
         if (e.button.button == SDL_BUTTON_LEFT)
         {
-            int x, y;
-            SDL_GetMouseState(&x, &y);
-            x = x + (int) this->camera.pos.x;
-            y = y + (int) this->camera.pos.y;
-            switch (this->player->getPowerupType())
+            if (this->player->canFire())
             {
-                case Powerup::PowerupType::NONE:
+                int x, y;
+                SDL_GetMouseState(&x, &y);
+                x = x + (int) this->camera.pos.x;
+                y = y + (int) this->camera.pos.y;
+                switch (this->player->getPowerupType())
                 {
-                    auto singleBullet = std::make_shared< Bullet >(this->camera, (int) player->getCenter().x,
-                                                                   (int) player->getCenter().y,
-                                                                   this->player->getShotPower(),
-                                                                   Entity::Type::PLAYER_BULLET);
-                    this->initEntity(singleBullet, phraktal::assets::PLAYER_BULLET_PNG);
-                    singleBullet->setDestination(x, y);
-                    break;
+                    case Powerup::PowerupType::NONE:
+                    {
+                        auto singleBullet = std::make_shared< Bullet >(this->camera, (int) player->getCenter().x,
+                                                                       (int) player->getCenter().y,
+                                                                       phraktal::levels::MAX_REGULAR_SHOT_SPEED,
+                                                                       Entity::Type::PLAYER_BULLET);
+                        this->initEntity(singleBullet, phraktal::assets::PLAYER_BULLET_PNG);
+                        singleBullet->setDestination(x, y);
+                        break;
+                    }
+
+                    case Powerup::PowerupType::SPREAD:
+                    {
+                        auto bullet1 = std::make_shared< Bullet >(this->camera, (int) player->getCenter().x,
+                                                                  (int) player->getCenter().y,
+                                                                  phraktal::levels::MAX_SPREAD_SHOT_SPEED,
+                                                                  Entity::Type::PLAYER_BULLET);
+                        auto bullet2 = std::make_shared< Bullet >(this->camera, (int) player->getCenter().x,
+                                                                  (int) player->getCenter().y,
+                                                                  phraktal::levels::MAX_SPREAD_SHOT_SPEED,
+                                                                  Entity::Type::PLAYER_BULLET);
+                        auto bullet3 = std::make_shared< Bullet >(this->camera, (int) player->getCenter().x,
+                                                                  (int) player->getCenter().y,
+                                                                  phraktal::levels::MAX_SPREAD_SHOT_SPEED,
+                                                                  Entity::Type::PLAYER_BULLET);
+                        this->initEntity(bullet1, phraktal::assets::SPREAD_PLAYER_BULLET_PNG);
+                        this->initEntity(bullet2, phraktal::assets::SPREAD_PLAYER_BULLET_PNG);
+                        this->initEntity(bullet3, phraktal::assets::SPREAD_PLAYER_BULLET_PNG);
+                        bullet1->setVelocityFromAngle(this->player->getAngle());
+                        bullet2->setVelocityFromAngle(this->player->getAngle() - 5);
+                        bullet3->setVelocityFromAngle(this->player->getAngle() + 5);
+                        break;
+                    }
+
+                    case Powerup::PowerupType::LARGE:
+                    {
+                        auto largeBullet = std::make_shared< Bullet >(this->camera, (int) player->getCenter().x,
+                                                                      (int) player->getCenter().y,
+                                                                      phraktal::levels::MAX_LARGE_SHOT_SPEED,
+                                                                      Entity::Type::PLAYER_BULLET);
+                        this->initEntity(largeBullet, phraktal::assets::LARGE_PLAYER_BULLET_PNG);
+                        largeBullet->setDestination(x, y);
+
+                        break;
+                    }
                 }
 
-                case Powerup::PowerupType::SPREAD:
-                {
-                    auto bullet1 = std::make_shared< Bullet >(this->camera, (int) player->getCenter().x,
-                                                              (int) player->getCenter().y,
-                                                              this->player->getShotPower(),
-                                                              Entity::Type::PLAYER_BULLET);
-                    auto bullet2 = std::make_shared< Bullet >(this->camera, (int) player->getCenter().x,
-                                                              (int) player->getCenter().y,
-                                                              this->player->getShotPower(),
-                                                              Entity::Type::PLAYER_BULLET);
-                    auto bullet3 = std::make_shared< Bullet >(this->camera, (int) player->getCenter().x,
-                                                              (int) player->getCenter().y,
-                                                              this->player->getShotPower(),
-                                                              Entity::Type::PLAYER_BULLET);
-                    this->initEntity(bullet1, phraktal::assets::PLAYER_BULLET_PNG);
-                    this->initEntity(bullet2, phraktal::assets::PLAYER_BULLET_PNG);
-                    this->initEntity(bullet3, phraktal::assets::PLAYER_BULLET_PNG);
-                    bullet1->setVelocityFromAngle(this->player->getAngle());
-                    bullet2->setVelocityFromAngle(this->player->getAngle() - 5);
-                    bullet3->setVelocityFromAngle(this->player->getAngle() + 5);
-                    break;
-                }
+                this->player->resetShotCooldown();
             }
-
-            this->player->setShotPower(0);
-            this->player->setChargingState(false);
         }
     }
     if (e.type == SDL_KEYDOWN)
@@ -213,6 +220,19 @@ void Engine::handleEvents(SDL_Event& e)
             auto powerup = std::make_shared< Powerup >(this->camera, x + (int) this->camera.pos.x,
                                                        y + (int) this->camera.pos.y, Powerup::PowerupType::SPREAD);
             this->initEntity(powerup, phraktal::assets::SPREAD_POWERUP_PNG);
+        }
+        if (e.key.keysym.sym == SDLK_2)
+        {
+            // Large bullet powerup
+            int x, y;
+            SDL_GetMouseState(&x, &y);
+            auto powerup = std::make_shared< Powerup >(this->camera, x + (int) this->camera.pos.x,
+                                                      y + (int) this->camera.pos.y, Powerup::PowerupType::LARGE);
+            this->initEntity(powerup, phraktal::assets::LARGE_BULLET_POWERUP_PNG);
+        }
+        if (e.key.keysym.sym == SDLK_3)
+        {
+            this->player->removePowerup();
         }
     }
 }
@@ -389,6 +409,8 @@ std::string Engine::getStats() const
     string << "Bullets: " << this->bullets.size() << std::endl;
     string << "Killed: " << this->enemiesKilled << std::endl;
     string << "Hit: " << this->timesHit << std::endl;
+    string << "Shot Cooldown: " << this->player->getShotCooldown() << std::endl;
+    string << "Max Shot Cooldown: " << this->player->getMaxShotCooldownTime() << std::endl;
     return string.str();
 }
 

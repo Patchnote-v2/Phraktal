@@ -50,6 +50,12 @@ Vector2 Entity::getCenter() const
     return this->center;
 }
 
+void Entity::setAim(int x, int y)
+{
+    this->aim.x = x;
+    this->aim.y = y;
+}
+
 Entity::Type Entity::getType() const
 {
     return this->type;

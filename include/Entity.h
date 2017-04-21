@@ -30,6 +30,7 @@ public:
     virtual void setPos(int x, int y);
     Vector2 getPos() const;
     Vector2 getCenter() const;
+    virtual void setAim(int x, int y);
     Entity::Type getType() const;
     int getAngle() const;
 

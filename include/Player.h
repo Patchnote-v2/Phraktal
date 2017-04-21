@@ -27,19 +27,18 @@ public:
     Powerup::PowerupType getPowerupType() const;
     void removePowerup();
 
-    void setShotPower(int shotPower);
-    int getShotPower() const;
-
-    void setChargingState(bool isCharging);
-    bool getChargingState();
+    void resetShotCooldown();
+    int getShotCooldown() const;
+    int getMaxShotCooldownTime() const;
+    bool canFire() const;
 
 private:
     float accelerationSpeed;
     float decelerationSpeed;
 
     Powerup::PowerupType powerupType;
-    int shotPower;
-    bool isCharging;
+    int shotCooldown;
+    int maxShotCooldownTime;
 
     std::map< SDL_Scancode, bool > keystates;
 };
