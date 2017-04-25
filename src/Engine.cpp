@@ -1,5 +1,6 @@
 #include <sstream>
 #include <ctime>
+#include <Coin.h>
 #include "Engine.h"
 
 /*
@@ -196,11 +197,17 @@ void Engine::handleEvents(SDL_Event& e)
 
             int x, y;
             SDL_GetMouseState(&x, &y);
-            auto enemy = std::make_shared< Enemy >(this->camera, x + (int) this->camera.pos.x,
-                                                   y + (int) this->camera.pos.y);
+            auto enemy = std::make_shared< Enemy >(this->camera, x + (int) this->camera.pos.x, y + (int) this->camera.pos.y);
             this->initEntity(enemy, phraktal::assets::ENEMY_PNG);
             enemy->setCurrentTarget(player);
             enemy->toggleActive();
+        }
+        if (e.key.keysym.sym == SDLK_c)
+        {
+            int x, y;
+            SDL_GetMouseState(&x, &y);
+            auto coin = std::make_shared< Coin >(this->camera, x + (int) this->camera.pos.x, y + (int) this->camera.pos.y);
+            this->initEntity(coin, phraktal::assets::COIN_PNG);
         }
         if (e.key.keysym.sym == SDLK_x)
         {
@@ -298,6 +305,8 @@ void Engine::updateEntities(float dTime)
                                     this->entities.erase(std::remove(this->entities.begin(), this->entities.end(), *k),
                                                          this->entities.end());
                                     this->grid.removeEntity(*k);
+                                    auto coin = std::make_shared< Coin >(this->camera, k->get()->pos.x, k->get()->pos.y);
+                                    this->initEntity(coin, phraktal::assets::COIN_PNG);
                                     enemiesKilled++;
                                 }
                                 this->bullets.erase(std::remove(this->bullets.begin(), this->bullets.end(), *l),
@@ -320,6 +329,8 @@ void Engine::updateEntities(float dTime)
                                     this->entities.erase(std::remove(this->entities.begin(), this->entities.end(), *l),
                                                          this->entities.end());
                                     this->grid.removeEntity(*l);
+                                    auto coin = std::make_shared< Coin >(this->camera, l->get()->pos.x, l->get()->pos.y);
+                                    this->initEntity(coin, phraktal::assets::COIN_PNG);
                                     enemiesKilled++;
                                 }
                                 this->bullets.erase(std::remove(this->bullets.begin(), this->bullets.end(), *k),
@@ -358,6 +369,29 @@ void Engine::updateEntities(float dTime)
                                 goto restart;
                             }
                         }
+
+                            // Coin
+                        else if (l->get()->getType() == Entity::Type::COIN)
+                        {
+                            if (l->get()->isColliding(this->player))
+                            {
+                                this->player->addCoins(1);
+                                this->entities.erase(std::remove(this->entities.begin(), this->entities.end(), *l), this->entities.end());
+                                this->grid.removeEntity(*l);
+                                goto restart;
+                            }
+                        }
+                        else if (k->get()->getType() == Entity::Type::COIN)
+                        {
+                            if (k->get()->isColliding(this->player))
+                            {
+                                this->player->addCoins(1);
+                                this->entities.erase(std::remove(this->entities.begin(), this->entities.end(), *k), this->entities.end());
+                                this->grid.removeEntity(*k);
+                                goto restart;
+                            }
+                        }
+
                             // Powerup
                         else if (l->get()->getType() == Entity::Type::POWERUP)
                         {
@@ -368,7 +402,6 @@ void Engine::updateEntities(float dTime)
                                                 ->getPowerupType()
                                                             );
                                 this->entities.erase(std::remove(this->entities.begin(), this->entities.end(), *l), this->entities.end());
-                                this->bullets.erase(std::remove(this->bullets.begin(), this->bullets.end(), *l), this->bullets.end());
                                 this->grid.removeEntity(*l);
                                 goto restart;
                             }
@@ -382,7 +415,6 @@ void Engine::updateEntities(float dTime)
                                                 ->getPowerupType()
                                                             );
                                 this->entities.erase(std::remove(this->entities.begin(), this->entities.end(), *k), this->entities.end());
-                                this->bullets.erase(std::remove(this->bullets.begin(), this->bullets.end(), *k), this->bullets.end());
                                 this->grid.removeEntity(*k);
                                 goto restart;
                             }
@@ -445,9 +477,7 @@ std::string Engine::getStats() const
     string << "Bullets: " << this->bullets.size() << std::endl;
     string << "Killed: " << this->enemiesKilled << std::endl;
     string << "Hit: " << this->timesHit << std::endl;
-    string << "Shot Cooldown: " << this->player->getShotCooldown() << std::endl;
-    string << "Max Shot Cooldown: " << this->player->getMaxShotCooldownTime() << std::endl;
-    string << "Camera X: " << this->camera.pos.x << std::endl;
+    string << "Coins: " << this->player->getCoinCount() << std::endl;
     return string.str();
 }
 

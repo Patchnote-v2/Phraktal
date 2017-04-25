@@ -32,6 +32,10 @@ public:
     int getMaxShotCooldownTime() const;
     bool canFire() const;
 
+    void addCoins(int numCoins);
+    void resetCoins();
+    int getCoinCount() const;
+
 private:
     float accelerationSpeed;
     float decelerationSpeed;
@@ -39,6 +43,8 @@ private:
     Powerup::PowerupType powerupType;
     int shotCooldown;
     int maxShotCooldownTime;
+
+    int numCoinsCollected;
 
     std::map< SDL_Scancode, bool > keystates;
 };

@@ -215,3 +215,18 @@ bool Player::canFire() const
 {
     return this->shotCooldown >= this->maxShotCooldownTime;
 }
+
+void Player::addCoins(int numCoins)
+{
+    this->numCoinsCollected += numCoins;
+}
+
+void Player::resetCoins()
+{
+    this->numCoinsCollected = 0;
+}
+
+int Player::getCoinCount() const
+{
+    return this->numCoinsCollected;
+}

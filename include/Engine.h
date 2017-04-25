@@ -84,14 +84,13 @@ void Engine::initEntity(std::shared_ptr< T > entity, std::string textureName)
         this->player = std::dynamic_pointer_cast< Player >(entity);
         this->entities.push_back(entity);
     }
-    else if (type == Entity::Type::POWERUP)
+    else if (type == Entity::Type::POWERUP ||
+            type == Entity::Type::ENEMY ||
+            type == Entity::Type::COIN)
     {
         this->entities.push_back(entity);
     }
-    else if (type == Entity::Type::ENEMY)
-    {
-        this->entities.push_back(entity);
-    }
+
     else if (type == Entity::Type::PLAYER_BULLET ||
             type == Entity::Type::ENEMY_BULLET)
     {

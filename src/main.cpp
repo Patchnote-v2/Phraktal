@@ -119,7 +119,6 @@ int main()
         // Stats
         statsText.str("");
         statsText << engine.getStats();
-        statsText << "Width: " << filled->w << std::endl;
         engine.updateText(stats, statsText.str());
 
         // Delta time

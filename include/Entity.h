@@ -17,7 +17,8 @@ public:
         ENEMY,
         PLAYER_BULLET,
         ENEMY_BULLET,
-        POWERUP
+        POWERUP,
+        COIN
     };
 
     Entity(Camera &camera, int x, int y);
