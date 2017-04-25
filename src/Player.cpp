@@ -6,7 +6,8 @@ Player::Player(Camera &camera, int x, int y) :
         decelerationSpeed(0.70f),
         powerupType(Powerup::PowerupType::NONE),
         shotCooldown(0),
-        maxShotCooldownTime(phraktal::levels::REGULAR_SHOT_COOLDOWN)
+        maxShotCooldownTime(phraktal::levels::REGULAR_SHOT_COOLDOWN),
+        numCoinsCollected(0)
 {
     this->type = Type::PLAYER;
 
@@ -26,23 +27,6 @@ void Player::handleEvents(SDL_Event& e)
             this->setPos((int) this->pos.x - ((int) this->pos.x - ((int) this->camera.pos.x + e.button.x)),
                          (int) this->pos.y - ((int) this->pos.y - ((int) this->camera.pos.y + e.button.y)));
         }
-        /* Old code for waypoints
-            int x;
-            int y;
-            SDL_GetMouseState(&x, &y);
-            this->destination.x = x;
-            this->destination.y = y;
-
-            this->angle = (atan2(this->pos.y - y, this->pos.x - x) * (180 / PI)) - 90;
-            if (this->angle < 0)
-            {
-                this->angle = 360 - (-angle);
-            }
-
-            this->velocity.x = x - this->pos.x;
-            this->velocity.y = y - this->pos.y;
-            this->velocity.normalize();
-        */
     }
 }
 

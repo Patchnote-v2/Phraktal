@@ -65,9 +65,9 @@ void Grid::addEntity(std::shared_ptr< Entity > entity)
              ? phraktal::levels::LEVEL_HEIGHT / this->cellSize
              : (rect->y + rect->h) / this->cellSize;
 
-    for (int col = x; col <= x2 && col < this->grid.size(); col++)
+    for (int col = x; col <= x2 && col < (int) this->grid.size(); col++)
     {
-        for (int row = y; row <= y2 && row < this->grid[col].size(); row++)
+        for (int row = y; row <= y2 && row < (int) this->grid[col].size(); row++)
         {
             this->grid[col][row].insert(entity);
         }
@@ -76,9 +76,9 @@ void Grid::addEntity(std::shared_ptr< Entity > entity)
 
 void Grid::removeEntity(std::shared_ptr< Entity > entity)
 {
-    for (int col = 0; col < this->grid.size(); col++)
+    for (int col = 0; col < (int) this->grid.size(); col++)
     {
-        for (int row = 0; row < this->grid[col].size(); row++)
+        for (int row = 0; row < (int) this->grid[col].size(); row++)
         {
             auto search = this->grid[col][row].find(entity);
             if (search != this->grid[col][row].end())
@@ -104,9 +104,9 @@ std::set< std::shared_ptr< Entity > > Grid::query(std::shared_ptr< Entity > enti
              ? phraktal::levels::LEVEL_HEIGHT / this->cellSize
              : (rect->y + rect->h) / this->cellSize;
 
-    for (int col = x; col <= x2 && col < this->grid.size(); col++)
+    for (int col = x; col <= x2 && col < (int) this->grid.size(); col++)
     {
-        for (int row = y; row <= y2 && row < this->grid[col].size(); row++)
+        for (int row = y; row <= y2 && row < (int) this->grid[col].size(); row++)
         {
             if (this->grid[col][row].find(entity) != this->grid[col][row].end())
             {

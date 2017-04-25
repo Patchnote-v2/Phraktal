@@ -22,8 +22,6 @@ public:
 
     Camera camera;
 
-    std::shared_ptr< SDL_Renderer > getRen() const;
-
     void setDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a);
     void rendererClear();
     void rendererPresent();
@@ -32,9 +30,8 @@ public:
 
     template<typename T>
     void initEntity(std::shared_ptr< T > entity, std::string textureName);
-//    void initEntity(std::shared_ptr< Player > entity, std::string textureName);
-//    void initEntity(std::shared_ptr< Bullet > entity, std::string textureName);
     void initText(std::shared_ptr< Text > text, int fontSize);
+    void initHud(std::shared_ptr< Entity > hud, std::string textureName);
 
     void handleEvents(SDL_Event& e);
 
@@ -65,6 +62,7 @@ private:
     std::vector< std::shared_ptr< Entity > > entities;
     std::vector< std::shared_ptr< Bullet > > bullets;
     std::vector< std::shared_ptr< Text > > text;
+    std::vector< std::shared_ptr< Entity > > hud;
 
     int init();
     void quitSDL();

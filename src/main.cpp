@@ -28,8 +28,8 @@ int main()
 
     // Timers
     Timer fpsTimer;
-    int countedFrames = 0;
-    float averageFPS = 0.0f;
+//    int countedFrames = 0;
+//    float averageFPS = 0.0f;
     fpsTimer.start();
 
     Timer capTimer;
@@ -37,38 +37,40 @@ int main()
     Timer deltaTimer;
     deltaTimer.start();
 
-    // Stats
+    /*
     std::stringstream fpsText;
     auto fps = std::make_shared< Text >(engine.camera, 10, 10);
     engine.initText(fps, phraktal::levels::DEFAULT_FONT_SIZE);
+     */
 
+    // Stats
     std::stringstream statsText;
-    auto stats = std::make_shared< Text >(engine.camera, 10, 50);
+    auto stats = std::make_shared< Text >(engine.camera, 10, 110);
     engine.initText(stats, phraktal::levels::DEFAULT_FONT_SIZE);
 
-    // Textures
+    // Background
     auto background = std::make_shared< BackgroundEntity >(engine.camera, 0, 0);
     engine.initEntity(background, phraktal::assets::BG_PNG);
 
-    // todo: HUD items
+    // Coin count
+    auto coinCountGraphic = std::make_shared< Entity >(engine.camera, 10, 10);
+    engine.initHud(coinCountGraphic, phraktal::assets::COIN_COUNT_GRAPHIC_PNG);
 
-    // Shot power bar
+    auto coinCount = std::make_shared< Text >(engine.camera, 110, 20);
+    engine.initText(coinCount, 100);
+
+    // todo: HUD items?
+
+    // Shot power bar rectangles
     SDL_Rect* filled = new SDL_Rect{phraktal::levels::SCREEN_WIDTH - 311, 11, 0, 35};
     SDL_Rect* barOutline = new SDL_Rect{phraktal::levels::SCREEN_WIDTH - 312, 10, 301, 37};
 
     // Keystates
     const Uint8* keystates = SDL_GetKeyboardState(NULL);
 
-    // Entities
-    auto player = std::make_shared< Player >(engine.camera, 0, 0);
+    // Player
+    auto player = std::make_shared< Player >(engine.camera, 100, 100);
     engine.initEntity(player, phraktal::assets::PLAYER_PNG);
-
-    // Bullets
-    std::vector< Bullet > bullets;
-
-    // todo: temp
-    bool leftMouseButtonState = false;
-    int shotPower = 0;
 
     // Main loop
     SDL_Event e;
@@ -76,22 +78,6 @@ int main()
     while (!quit)
     {
         capTimer.start();
-        /*
-        if (fpsTimer->getTicks() - secondCounter > 3000)
-        {
-            secondCounter = fpsTimer->getTicks();
-            std::srand((uint) std::time(0));
-            int x = (std::rand() % phraktal::levels::LEVEL_WIDTH);
-            int y = (std::rand() % phraktal::levels::LEVEL_HEIGHT);
-            auto testEnemy = std::make_shared< Enemy >(camera);
-            testEnemy->setRenderer(renderer);
-            testEnemy->loadTexture(phraktal::assets::ENEMY_PNG);
-            testEnemy->setPos(x, y);
-            testEnemy->setCurrentTarget(player);
-            testEnemy->toggleActive();
-            grid->addEntity(testEnemy);
-        }
-         */
         player->handleKeystates(keystates);
 
         while (SDL_PollEvent(&e))
@@ -107,6 +93,7 @@ int main()
         }
 
         // FPS
+        /*
         averageFPS = countedFrames / (fpsTimer.getTicks() / 1000.f);
         if (averageFPS > 20000)
         {
@@ -115,6 +102,7 @@ int main()
         fpsText.str("");
         fpsText << "FPS: " << averageFPS;
         engine.updateText(fps, fpsText.str());
+         */
 
         // Stats
         statsText.str("");
@@ -124,14 +112,12 @@ int main()
         // Delta time
         float dTime = deltaTimer.getTicks() / 1000.f;
 
-        if (player->getShotCooldown() != 0)
-        {
-            filled->w = (int) (((float) player->getShotCooldown() / (float) player->getMaxShotCooldownTime()) * 100.f) * 3;
-        }
-
         // Update all entities
         engine.updateEntities(dTime);
         engine.resetGrid();
+
+        // Update coin count
+        engine.updateText(coinCount, std::to_string(player->getCoinCount()));
 
         // Camera
         engine.camera.update();
@@ -144,24 +130,30 @@ int main()
         engine.renderEntity(background);
         engine.renderEntities();
 
+        // Player shot cooldown bar width
+        if (player->getShotCooldown() != 0)
+        {
+            filled->w = (int) (((float) player->getShotCooldown() / (float) player->getMaxShotCooldownTime()) * 100.f) * 3;
+        }
+
         // Player shot cooldown bar
         {
             int percentage = (int) (((float) player->getShotCooldown() / (float) player->getMaxShotCooldownTime()) * 100.f);
-            SDL_Color color{0, 0, 0, 255};
+            SDL_Color color{0x00, 0x00, 0x00, 0xFF};
 
             if (percentage == 100)
             {
-                color.r = 0;
-                color.g = 255;
+                color.r = 0x00;
+                color.g = 0xFF;
             }
             else if (percentage > 50)
             {
                 color.r = (Uint8) ((100 - (((float) player->getShotCooldown() / (float) player->getMaxShotCooldownTime()) * 100.f)) / phraktal::levels::HALF_PERCENT_TO_COLOR_CONVERSION);
-                color.g = 255;
+                color.g = 0x00;
             }
             else
             {
-                color.r = 255;
+                color.r = 0xFF;
                 color.g = (Uint8) (((float) player->getShotCooldown() / (float) player->getMaxShotCooldownTime()) * 100.f / phraktal::levels::HALF_PERCENT_TO_COLOR_CONVERSION);
             }
 
@@ -169,13 +161,12 @@ int main()
         }
         engine.renderRectangleFilled(*filled);
         engine.setDrawColor(255, 255, 255, 255);
-
         engine.renderRectangleOutline(*barOutline);
 
         engine.rendererPresent();
 
         // FPS
-        countedFrames++;
+//        countedFrames++;
         Uint32 frameTicks = capTimer.getTicks();
         if (frameTicks < phraktal::levels::SCREEN_TICKS_PER_FRAME)
         {

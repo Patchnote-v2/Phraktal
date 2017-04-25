@@ -10,7 +10,7 @@ namespace phraktal
 {
     namespace levels
     {
-        const float PI = 3.1415926;
+        const float PI = 3.1415926f;
 
         const Uint32 SCREEN_FPS = 60;
         const Uint32 SCREEN_TICKS_PER_FRAME = 1000 / SCREEN_FPS;
@@ -26,17 +26,19 @@ namespace phraktal
 
         const int DEFAULT_FONT_SIZE = 18;
 
+        const int MAX_ENEMY_SPEED = 100;
+
         const int MAX_REGULAR_SHOT_SPEED = 1000;
         const int MAX_SPREAD_SHOT_SPEED = 2000;
         const int MAX_LARGE_SHOT_SPEED = 500;
 
-        const int REGULAR_SHOT_COOLDOWN = 500;
+        const int REGULAR_SHOT_COOLDOWN = 250;
         const int SPREAD_SHOT_COOLDOWN = 250;
         const int LARGE_SHOT_COOLDOWN = 750;
 
         const int REGULAR_SHOT_DAMAGE = 2000;
         const int SPREAD_SHOT_DAMAGE = 1000;
-        const int LARGE_SHOT_DAMAGE = 3000;
+        const int LARGE_SHOT_DAMAGE = 6000;
 
         const int ENEMY_HEALTH = 6000;
 
@@ -63,6 +65,7 @@ namespace phraktal
         const std::string LARGE_BULLET_POWERUP_PNG = "assets/images/largebulletpowerup.png";
 
         const std::string COIN_PNG = "assets/images/coin.png";
+        const std::string COIN_COUNT_GRAPHIC_PNG = "assets/images/coincountgraphic.png";
 
         const std::string VOID_PNG = "assets/images/void.png";
         const std::string GRASS_PNG = "assets/images/grass.png";
@@ -117,27 +120,19 @@ namespace phraktal
          */
         // todo: old code for destination navigation
         /*
-        if (abs(this->pos.x - this->destination.x) <= abs(this->velocity.x * dTime * MAX_SPEED) + EPSILON)
-        {
-            this->velocity.x = 0;
-            this->pos.x = this->destination.x;
-            this->destination.x = 0;
-        }
-        else
-        {
-            this->pos.x += this->velocity.x * dTime * MAX_SPEED;
-        }
-
-        if (abs(this->pos.y - this->destination.y) <= abs(this->velocity.y * dTime * MAX_SPEED) + EPSILON)
-        {
-            this->velocity.y = 0;
-            this->pos.y = this->destination.y;
-            this->destination.y = 0;
-        }
-        else
-        {
-            this->pos.y += this->velocity.y * dTime * MAX_SPEED;
-        }
+        int x;
+            int y;
+            SDL_GetMouseState(&x, &y);
+            this->destination.x = x;
+            this->destination.y = y;
+            this->angle = (atan2(this->pos.y - y, this->pos.x - x) * (180 / PI)) - 90;
+            if (this->angle < 0)
+            {
+                this->angle = 360 - (-angle);
+            }
+            this->velocity.x = x - this->pos.x;
+            this->velocity.y = y - this->pos.y;
+            this->velocity.normalize();
          */
     }
 }

@@ -105,6 +105,14 @@ void Engine::initText(std::shared_ptr< Text > text, int fontSize)
     this->text.push_back(text);
 }
 
+void Engine::initHud(std::shared_ptr< Entity > hud, std::string textureName)
+{
+    hud->texture = std::unique_ptr< TextureW >(new TextureW());
+    hud->texture->setRenderer(this->renderer);
+    hud->loadTexture(textureName);
+    this->hud.push_back(hud);
+}
+
 void Engine::updateText(std::shared_ptr< Text > text, std::string textStr)
 {
     SDL_Color color = {255, 255, 255, 255};
@@ -199,6 +207,7 @@ void Engine::handleEvents(SDL_Event& e)
             SDL_GetMouseState(&x, &y);
             auto enemy = std::make_shared< Enemy >(this->camera, x + (int) this->camera.pos.x, y + (int) this->camera.pos.y);
             this->initEntity(enemy, phraktal::assets::ENEMY_PNG);
+            enemy->setMaxSpeed(phraktal::levels::MAX_ENEMY_SPEED);
             enemy->setCurrentTarget(player);
             enemy->toggleActive();
         }
@@ -219,10 +228,11 @@ void Engine::handleEvents(SDL_Event& e)
             std::srand((uint) std::time(0));
             int x = (std::rand() % phraktal::levels::SCREEN_WIDTH);
             int y = (std::rand() % phraktal::levels::SCREEN_HEIGHT);
-            auto testEnemy = std::make_shared< Enemy >(this->camera, x, y);
-            this->initEntity(testEnemy, phraktal::assets::ENEMY_PNG);
-            testEnemy->setCurrentTarget(player);
-            testEnemy->toggleActive();
+            auto enemy = std::make_shared< Enemy >(this->camera, x, y);
+            this->initEntity(enemy, phraktal::assets::ENEMY_PNG);
+            enemy->setMaxSpeed(phraktal::levels::MAX_ENEMY_SPEED);
+            enemy->setCurrentTarget(player);
+            enemy->toggleActive();
         }
         if (e.key.keysym.sym == SDLK_1)
         {
@@ -454,6 +464,10 @@ void Engine::renderEntities()
         this->renderEntity(bullet);
     }
     this->renderEntity(this->player);
+    for (auto hud : this->hud)
+    {
+        this->renderEntityStatic(hud);
+    }
     for (auto text : this->text)
     {
         this->renderEntityStatic(text);
@@ -477,7 +491,6 @@ std::string Engine::getStats() const
     string << "Bullets: " << this->bullets.size() << std::endl;
     string << "Killed: " << this->enemiesKilled << std::endl;
     string << "Hit: " << this->timesHit << std::endl;
-    string << "Coins: " << this->player->getCoinCount() << std::endl;
     return string.str();
 }
 
@@ -519,9 +532,4 @@ void Engine::quitSDL()
     SDL_Quit();
     IMG_Quit();
     TTF_Quit();
-}
-
-std::shared_ptr< SDL_Renderer > Engine::getRen() const
-{
-    return this->renderer;
 }

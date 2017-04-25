@@ -19,6 +19,15 @@ void Enemy::update(float dTime)
         this->aim.y = this->currentTarget->getCenter().y;
     }
 
+    int x, y;
+    x = (int) this->currentTarget->getCenter().x;
+    y = (int) this->currentTarget->getCenter().y;
+    this->destination.x = x;
+    this->destination.y = y;
+    this->velocity.x = x - this->pos.x;
+    this->velocity.y = y - this->pos.y;
+    this->velocity.normalize();
+
     MoveableEntity::update(dTime);
 
     this->shotCooldown += dTime;

@@ -55,5 +55,8 @@ int Bullet::getDamage()
 
         case Powerup::PowerupType::LARGE:
             return phraktal::levels::LARGE_SHOT_DAMAGE;
+
+        default:
+            return phraktal::levels::REGULAR_SHOT_DAMAGE;
     }
 }
