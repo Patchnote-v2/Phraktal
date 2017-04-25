@@ -125,6 +125,7 @@ void Player::update(float dTime)
     // Update camera
     this->camera.pos.x = (int) this->center.x - (phraktal::levels::SCREEN_WIDTH / 2);
     this->camera.pos.y = (int) this->center.y - (phraktal::levels::SCREEN_HEIGHT / 2);
+    this->camera.update();
 
     // Keep within level size
     if ((int) this->pos.x < 0)

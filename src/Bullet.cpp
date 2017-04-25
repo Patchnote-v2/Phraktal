@@ -1,7 +1,8 @@
 #include "Bullet.h"
 
-Bullet::Bullet(Camera &camera, int x, int y, float maxSpeed, Entity::Type type) :
-        MoveableEntity(camera, x, y)
+Bullet::Bullet(Camera &camera, int x, int y, float maxSpeed, Entity::Type type, Powerup::PowerupType powerupType) :
+        MoveableEntity(camera, x, y),
+        powerupType(powerupType)
 {
     if (maxSpeed < MINIMUM_SPEED)
     {
@@ -40,4 +41,19 @@ void Bullet::update(float dTime)
     this->pos.y += this->velocity.y * dTime * this->maxSpeed;
 
     this->updateCenter();
+}
+
+int Bullet::getDamage()
+{
+    switch (this->powerupType)
+    {
+        case Powerup::PowerupType::NONE:
+            return phraktal::levels::REGULAR_SHOT_DAMAGE;
+
+        case Powerup::PowerupType::SPREAD:
+            return phraktal::levels::SPREAD_SHOT_DAMAGE;
+
+        case Powerup::PowerupType::LARGE:
+            return phraktal::levels::LARGE_SHOT_DAMAGE;
+    }
 }

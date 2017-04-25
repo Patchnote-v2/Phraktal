@@ -34,6 +34,15 @@ namespace phraktal
         const int SPREAD_SHOT_COOLDOWN = 250;
         const int LARGE_SHOT_COOLDOWN = 750;
 
+        const int REGULAR_SHOT_DAMAGE = 2000;
+        const int SPREAD_SHOT_DAMAGE = 1000;
+        const int LARGE_SHOT_DAMAGE = 3000;
+
+        const int ENEMY_HEALTH = 6000;
+
+        const float PERCENT_TO_COLOR_CONVERSION = .392f;
+        const float HALF_PERCENT_TO_COLOR_CONVERSION = .196f;
+
         const std::string LEVEL1_TXT = "assets/levels/level1.txt";
     }
 

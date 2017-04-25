@@ -138,7 +138,8 @@ void Engine::handleEvents(SDL_Event& e)
                         auto singleBullet = std::make_shared< Bullet >(this->camera, (int) player->getCenter().x,
                                                                        (int) player->getCenter().y,
                                                                        phraktal::levels::MAX_REGULAR_SHOT_SPEED,
-                                                                       Entity::Type::PLAYER_BULLET);
+                                                                       Entity::Type::PLAYER_BULLET,
+                                                                      Powerup::PowerupType::NONE);
                         this->initEntity(singleBullet, phraktal::assets::PLAYER_BULLET_PNG);
                         singleBullet->setDestination(x, y);
                         break;
@@ -149,15 +150,18 @@ void Engine::handleEvents(SDL_Event& e)
                         auto bullet1 = std::make_shared< Bullet >(this->camera, (int) player->getCenter().x,
                                                                   (int) player->getCenter().y,
                                                                   phraktal::levels::MAX_SPREAD_SHOT_SPEED,
-                                                                  Entity::Type::PLAYER_BULLET);
+                                                                  Entity::Type::PLAYER_BULLET,
+                                                                  Powerup::PowerupType::SPREAD);
                         auto bullet2 = std::make_shared< Bullet >(this->camera, (int) player->getCenter().x,
                                                                   (int) player->getCenter().y,
                                                                   phraktal::levels::MAX_SPREAD_SHOT_SPEED,
-                                                                  Entity::Type::PLAYER_BULLET);
+                                                                  Entity::Type::PLAYER_BULLET,
+                                                                  Powerup::PowerupType::SPREAD);
                         auto bullet3 = std::make_shared< Bullet >(this->camera, (int) player->getCenter().x,
                                                                   (int) player->getCenter().y,
                                                                   phraktal::levels::MAX_SPREAD_SHOT_SPEED,
-                                                                  Entity::Type::PLAYER_BULLET);
+                                                                  Entity::Type::PLAYER_BULLET,
+                                                                  Powerup::PowerupType::SPREAD);
                         this->initEntity(bullet1, phraktal::assets::SPREAD_PLAYER_BULLET_PNG);
                         this->initEntity(bullet2, phraktal::assets::SPREAD_PLAYER_BULLET_PNG);
                         this->initEntity(bullet3, phraktal::assets::SPREAD_PLAYER_BULLET_PNG);
@@ -172,7 +176,8 @@ void Engine::handleEvents(SDL_Event& e)
                         auto largeBullet = std::make_shared< Bullet >(this->camera, (int) player->getCenter().x,
                                                                       (int) player->getCenter().y,
                                                                       phraktal::levels::MAX_LARGE_SHOT_SPEED,
-                                                                      Entity::Type::PLAYER_BULLET);
+                                                                      Entity::Type::PLAYER_BULLET,
+                                                                      Powerup::PowerupType::LARGE);
                         this->initEntity(largeBullet, phraktal::assets::LARGE_PLAYER_BULLET_PNG);
                         largeBullet->setDestination(x, y);
 
@@ -250,7 +255,7 @@ void Engine::updateEntities(float dTime)
             if ((int) derived->shotCooldown > 3)
             {
                 auto bullet = std::make_shared< Bullet >(camera, (int) derived->getCenter().x,
-                                                         (int) derived->getCenter().y, 200, Entity::Type::ENEMY_BULLET);
+                                                         (int) derived->getCenter().y, 200, Entity::Type::ENEMY_BULLET, Powerup::PowerupType::NONE);
                 this->initEntity(bullet, phraktal::assets::ENEMY_BULLET_PNG);
                 bullet->setDestination((int) this->player->getCenter().x, (int) this->player->getCenter().y);
 
@@ -279,24 +284,47 @@ void Engine::updateEntities(float dTime)
                     else
                     {
                         // Player's bullets
-                        if (((l->get()->getType() == Entity::Type::PLAYER_BULLET) &&
-                             (k->get()->getType() == Entity::Type::ENEMY)) ||
-                            ((l->get()->getType() == Entity::Type::ENEMY) &&
-                             (k->get()->getType() == Entity::Type::PLAYER_BULLET)))
+                        if ((l->get()->getType() == Entity::Type::PLAYER_BULLET) &&
+                             (k->get()->getType() == Entity::Type::ENEMY))
                         {
+                            // k = enemy
                             if (k->get()->isColliding(*l))
                             {
-                                this->entities.erase(std::remove(this->entities.begin(), this->entities.end(), *l),
-                                                     this->entities.end());
-                                this->entities.erase(std::remove(this->entities.begin(), this->entities.end(), *k),
-                                                     this->entities.end());
+                                auto enemy = std::dynamic_pointer_cast< Enemy >(*k);
+                                auto bullet = std::dynamic_pointer_cast< Bullet >(*l);
+                                enemy->setHealth(enemy->getHealth() - bullet->getDamage());
+                                if (enemy->getHealth() <= 0)
+                                {
+                                    this->entities.erase(std::remove(this->entities.begin(), this->entities.end(), *k),
+                                                         this->entities.end());
+                                    this->grid.removeEntity(*k);
+                                    enemiesKilled++;
+                                }
                                 this->bullets.erase(std::remove(this->bullets.begin(), this->bullets.end(), *l),
                                                     this->bullets.end());
+                                this->grid.removeEntity(*l);
+                                goto restart;
+                            }
+                        }
+                        else if ((l->get()->getType() == Entity::Type::ENEMY) &&
+                                  (k->get()->getType() == Entity::Type::PLAYER_BULLET))
+                        {
+                            // l = enemy
+                            if (k->get()->isColliding(*l))
+                            {
+                                auto enemy = std::dynamic_pointer_cast< Enemy >(*l);
+                                auto bullet = std::dynamic_pointer_cast< Bullet >(*k);
+                                enemy->setHealth(enemy->getHealth() - bullet->getDamage());
+                                if (enemy->getHealth() <= 0)
+                                {
+                                    this->entities.erase(std::remove(this->entities.begin(), this->entities.end(), *l),
+                                                         this->entities.end());
+                                    this->grid.removeEntity(*l);
+                                    enemiesKilled++;
+                                }
                                 this->bullets.erase(std::remove(this->bullets.begin(), this->bullets.end(), *k),
                                                     this->bullets.end());
-                                this->grid.removeEntity(*l);
                                 this->grid.removeEntity(*k);
-                                enemiesKilled++;
                                 goto restart;
                             }
                         }
@@ -380,6 +408,14 @@ void Engine::renderEntities()
     for (auto entity : this->entities)
     {
         this->renderEntity(entity);
+        if (entity->getType() == Entity::Type::ENEMY)
+        {
+            auto enemy = std::dynamic_pointer_cast< Enemy >(entity);
+            auto color = enemy->getHealthColor();
+            this->setDrawColor(color->r, color->g, color->b, color->a);
+            this->renderRectangleOutline(*(enemy->healthBarOutline));
+            this->renderRectangleFilled(*(enemy->healthBarFilled));
+        }
     }
     for (auto bullet : this->bullets)
     {
@@ -411,6 +447,7 @@ std::string Engine::getStats() const
     string << "Hit: " << this->timesHit << std::endl;
     string << "Shot Cooldown: " << this->player->getShotCooldown() << std::endl;
     string << "Max Shot Cooldown: " << this->player->getMaxShotCooldownTime() << std::endl;
+    string << "Camera X: " << this->camera.pos.x << std::endl;
     return string.str();
 }
 

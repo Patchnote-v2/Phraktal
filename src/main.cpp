@@ -145,17 +145,32 @@ int main()
         engine.renderEntity(background);
         engine.renderEntities();
 
-        // Powerbar
-        if (player->canFire())
+        // Player shot cooldown bar
         {
-            engine.setDrawColor(0, 255, 0, 255);
-        }
-        else
-        {
-            engine.setDrawColor(255, 0, 0, 255);
+            int percentage = (int) (((float) player->getShotCooldown() / (float) player->getMaxShotCooldownTime()) * 100.f);
+            SDL_Color color{0, 0, 0, 255};
+
+            if (percentage == 100)
+            {
+                color.r = 0;
+                color.g = 255;
+            }
+            else if (percentage > 50)
+            {
+                color.r = (Uint8) ((100 - (((float) player->getShotCooldown() / (float) player->getMaxShotCooldownTime()) * 100.f)) / phraktal::levels::HALF_PERCENT_TO_COLOR_CONVERSION);
+                color.g = 255;
+            }
+            else
+            {
+                color.r = 255;
+                color.g = (Uint8) (((float) player->getShotCooldown() / (float) player->getMaxShotCooldownTime()) * 100.f / phraktal::levels::HALF_PERCENT_TO_COLOR_CONVERSION);
+            }
+
+            engine.setDrawColor(color.r, color.g, color.b, color.a);
         }
         engine.renderRectangleFilled(*filled);
         engine.setDrawColor(255, 255, 255, 255);
+
         engine.renderRectangleOutline(*barOutline);
 
         engine.rendererPresent();
