@@ -5,13 +5,14 @@
 
 #include "MoveableEntity.h"
 #include "Player.h"
+#include "Bar.h"
 
 class Enemy : public MoveableEntity
 {
 public:
     float shotCooldown;
-    SDL_Rect* healthBarOutline;
-    SDL_Rect* healthBarFilled;
+//    SDL_Rect* healthBarOutline;
+//    SDL_Rect* healthBarFilled;
 
     Enemy(Camera &camera, int x, int y);
 
@@ -22,12 +23,16 @@ public:
 
     void setHealth(int health);
     int getHealth() const;
+    std::shared_ptr< Bar > getHealthBar() const;
 
     std::unique_ptr< SDL_Color > getHealthColor() const;
 
 private:
     bool active;
     int health;
+
+    std::shared_ptr< Bar > healthBar;
+
     std::shared_ptr< Player > currentTarget;
 
 };

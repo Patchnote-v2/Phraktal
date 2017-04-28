@@ -455,8 +455,7 @@ void Engine::renderEntities()
             auto enemy = std::dynamic_pointer_cast< Enemy >(entity);
             auto color = enemy->getHealthColor();
             this->setDrawColor(color->r, color->g, color->b, color->a);
-            this->renderRectangleOutline(*(enemy->healthBarOutline));
-            this->renderRectangleFilled(*(enemy->healthBarFilled));
+            this->renderBar(enemy->getHealthBar());
         }
     }
     for (auto bullet : this->bullets)
@@ -482,6 +481,14 @@ void Engine::renderRectangleOutline(SDL_Rect rect)
 void Engine::renderRectangleFilled(SDL_Rect rect)
 {
     SDL_RenderFillRect(this->renderer.get(), &rect);
+}
+
+void Engine::renderBar(std::shared_ptr< Bar > bar)
+{
+    SDL_RenderDrawRect(this->renderer.get(), bar->barOutline.get());
+    SDL_RenderFillRect(this->renderer.get(), bar->filled.get());
+//    this->renderRectangleOutline(bar->barOutline);
+//    this->renderRectangleFilled(bar->filled);
 }
 
 std::string Engine::getStats() const

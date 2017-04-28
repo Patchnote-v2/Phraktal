@@ -6,9 +6,7 @@ Enemy::Enemy(Camera &camera, int x, int y) :
         health(phraktal::levels::ENEMY_HEALTH)
 {
     this->type = Entity::Type::ENEMY;
-
-    this->healthBarOutline = new SDL_Rect{x, y - 12, 52, 12};
-    this->healthBarFilled = new SDL_Rect{x + 1, y - 11, 50, 10};
+    this->healthBar = std::make_shared< Bar >(x, y - 20, 50, 10);
 }
 
 void Enemy::update(float dTime)
@@ -32,13 +30,8 @@ void Enemy::update(float dTime)
 
     this->shotCooldown += dTime;
 
-    this->healthBarFilled->w = (int) (((float) this->health / (float) phraktal::levels::ENEMY_HEALTH) * 100 / 2);
-
-    this->healthBarOutline->x = (int) this->pos.x - (int) this->camera.pos.x;
-    this->healthBarOutline->y = (int) (this->pos.y - 12) - (int) this->camera.pos.y;
-    this->healthBarFilled->x = (int) (this->pos.x + 1) - (int) this->camera.pos.x;
-    this->healthBarFilled->y = (int) (this->pos.y - 11) - (int) this->camera.pos.y;
-
+    this->healthBar->setPos((int) (this->pos.x - this->camera.pos.x), (int) (this->pos.y - 10 - this->camera.pos.y));
+    this->healthBar->setPercentage((int) (((float) this->health / (float) phraktal::levels::ENEMY_HEALTH) * 100.f));
 }
 
 void Enemy::toggleActive()
@@ -64,6 +57,11 @@ void Enemy::setHealth(int health)
 int Enemy::getHealth() const
 {
     return health;
+}
+
+std::shared_ptr< Bar > Enemy::getHealthBar() const
+{
+    return this->healthBar;
 }
 
 std::unique_ptr< SDL_Color > Enemy::getHealthColor() const

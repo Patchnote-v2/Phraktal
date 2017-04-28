@@ -47,6 +47,7 @@ public:
 
     void renderRectangleOutline(SDL_Rect rect);
     void renderRectangleFilled(SDL_Rect rect);
+    void renderBar(std::shared_ptr< Bar > bar);
 
     std::string getStats() const;
 

@@ -62,8 +62,9 @@ int main()
     // todo: HUD items?
 
     // Shot power bar rectangles
-    SDL_Rect* filled = new SDL_Rect{phraktal::levels::SCREEN_WIDTH - 311, 11, 0, 35};
-    SDL_Rect* barOutline = new SDL_Rect{phraktal::levels::SCREEN_WIDTH - 312, 10, 301, 37};
+//    SDL_Rect* filled = new SDL_Rect{phraktal::levels::SCREEN_WIDTH - 311, 11, 0, 35};
+//    SDL_Rect* barOutline = new SDL_Rect{phraktal::levels::SCREEN_WIDTH - 312, 10, 301, 37};
+    auto shotCooldownBar = std::make_shared< Bar >(phraktal::levels::SCREEN_WIDTH - 310, 10, 300, 35);
 
     // Keystates
     const Uint8* keystates = SDL_GetKeyboardState(NULL);
@@ -130,22 +131,13 @@ int main()
         engine.renderEntity(background);
         engine.renderEntities();
 
+        shotCooldownBar->setPercentage((int) (((float) player->getShotCooldown() / (float) player->getMaxShotCooldownTime()) * 100.f));
         {
-            int percentage = (int) (((float) player->getShotCooldown() / (float) player->getMaxShotCooldownTime()) * 100.f);
-
-            // Player shot cooldown bar width
-            if (player->getShotCooldown() != 0)
-            {
-                filled->w = percentage * 3;
-            }
-
             auto color = player->getChargeBarColor();
-
             engine.setDrawColor(color->r, color->g, color->b, color->a);
         }
-        engine.renderRectangleFilled(*filled);
+        engine.renderBar(shotCooldownBar);
         engine.setDrawColor(0xFF, 0xFF, 0xFF, 0xFF);
-        engine.renderRectangleOutline(*barOutline);
 
         engine.rendererPresent();
 
