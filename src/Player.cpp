@@ -200,6 +200,30 @@ bool Player::canFire() const
     return this->shotCooldown >= this->maxShotCooldownTime;
 }
 
+std::unique_ptr< SDL_Color > Player::getChargeBarColor() const
+{
+    std::unique_ptr< SDL_Color > color(new SDL_Color{0x00, 0x00, 0x00, 0xFF});
+    int percentage = (int) (((float) this->shotCooldown / (float) this->maxShotCooldownTime) * 100.f);
+
+    if (percentage == 100)
+    {
+        color->r = 0x00;
+        color->g = 0xFF;
+    }
+    else if (percentage >= 50)
+    {
+        color->r = (Uint8) ((100 - percentage) / phraktal::levels::HALF_PERCENT_TO_COLOR_CONVERSION);
+        color->g = 0xFF;
+    }
+    else
+    {
+        color->r = 0xFF;
+        color->g = (Uint8) (percentage / phraktal::levels::HALF_PERCENT_TO_COLOR_CONVERSION);
+    }
+
+    return std::move(color);
+}
+
 void Player::addCoins(int numCoins)
 {
     this->numCoinsCollected += numCoins;

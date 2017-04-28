@@ -31,6 +31,7 @@ public:
     int getShotCooldown() const;
     int getMaxShotCooldownTime() const;
     bool canFire() const;
+    std::unique_ptr< SDL_Color > getChargeBarColor() const;
 
     void addCoins(int numCoins);
     void resetCoins();

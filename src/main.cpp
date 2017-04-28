@@ -130,37 +130,21 @@ int main()
         engine.renderEntity(background);
         engine.renderEntities();
 
-        // Player shot cooldown bar width
-        if (player->getShotCooldown() != 0)
-        {
-            filled->w = (int) (((float) player->getShotCooldown() / (float) player->getMaxShotCooldownTime()) * 100.f) * 3;
-        }
-
-        // Player shot cooldown bar
         {
             int percentage = (int) (((float) player->getShotCooldown() / (float) player->getMaxShotCooldownTime()) * 100.f);
-            SDL_Color color{0x00, 0x00, 0x00, 0xFF};
 
-            if (percentage == 100)
+            // Player shot cooldown bar width
+            if (player->getShotCooldown() != 0)
             {
-                color.r = 0x00;
-                color.g = 0xFF;
-            }
-            else if (percentage > 50)
-            {
-                color.r = (Uint8) ((100 - (((float) player->getShotCooldown() / (float) player->getMaxShotCooldownTime()) * 100.f)) / phraktal::levels::HALF_PERCENT_TO_COLOR_CONVERSION);
-                color.g = 0x00;
-            }
-            else
-            {
-                color.r = 0xFF;
-                color.g = (Uint8) (((float) player->getShotCooldown() / (float) player->getMaxShotCooldownTime()) * 100.f / phraktal::levels::HALF_PERCENT_TO_COLOR_CONVERSION);
+                filled->w = percentage * 3;
             }
 
-            engine.setDrawColor(color.r, color.g, color.b, color.a);
+            auto color = player->getChargeBarColor();
+
+            engine.setDrawColor(color->r, color->g, color->b, color->a);
         }
         engine.renderRectangleFilled(*filled);
-        engine.setDrawColor(255, 255, 255, 255);
+        engine.setDrawColor(0xFF, 0xFF, 0xFF, 0xFF);
         engine.renderRectangleOutline(*barOutline);
 
         engine.rendererPresent();
