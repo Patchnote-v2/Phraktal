@@ -17,30 +17,44 @@ namespace phraktal
 
         // Level numbers
         const int LEVEL_WIDTH = 1920;
-//        const int LEVEL_WIDTH = 1080;
         const int LEVEL_HEIGHT = 1080;
-//        const int LEVEL_HEIGHT = 480;
         const int SCREEN_WIDTH = 1280;
         const int SCREEN_HEIGHT = 720;
         const int TILE_SIZE = 100;
 
         const int DEFAULT_FONT_SIZE = 18;
 
-        const int MAX_ENEMY_SPEED = 100;
+        const int MAX_REGULAR_ENEMY_SPEED = 100;
+        const int MAX_SPREAD_ENEMY_SPEED = 75;
+        const int MAX_LARGE_ENEMY_SPEED = 50;
 
-        const int MAX_REGULAR_SHOT_SPEED = 1000;
-        const int MAX_SPREAD_SHOT_SPEED = 2000;
-        const int MAX_LARGE_SHOT_SPEED = 500;
+        const int MAX_PLAYER_REGULAR_SHOT_SPEED = 1000;
+        const int MAX_PLAYER_SPREAD_SHOT_SPEED = 2000;
+        const int MAX_PLAYER_LARGE_SHOT_SPEED = 500;
 
-        const int REGULAR_SHOT_COOLDOWN = 250;
-        const int SPREAD_SHOT_COOLDOWN = 250;
-        const int LARGE_SHOT_COOLDOWN = 750;
+        const int MAX_ENEMY_REGULAR_SHOT_SPEED = 1000;
+        const int MAX_ENEMY_SPREAD_SHOT_SPEED = 1250;
+        const int MAX_ENEMY_LARGE_SHOT_SPEED = 500;
 
-        const int REGULAR_SHOT_DAMAGE = 2000;
-        const int SPREAD_SHOT_DAMAGE = 1000;
-        const int LARGE_SHOT_DAMAGE = 6000;
+        const int REGULAR_PLAYER_SHOT_COOLDOWN = 250;
+        const int SPREAD_PLAYER_SHOT_COOLDOWN = 250;
+        const int LARGE_PLAYER_SHOT_COOLDOWN = 750;
 
-        const int ENEMY_HEALTH = 6000;
+        const int REGULAR_ENEMY_SHOT_COOLDOWN = 2000;
+        const int SPREAD_ENEMY_SHOT_COOLDOWN = 2500;
+        const int LARGE_ENEMY_SHOT_COOLDOWN = 3000;
+
+        const int REGULAR_PLAYER_SHOT_DAMAGE = 2000;
+        const int SPREAD_PLAYER_SHOT_DAMAGE = 1000;
+        const int LARGE_PLAYER_SHOT_DAMAGE = 6000;
+
+        const int REGULAR_ENEMY_SHOT_DAMAGE = 2000;
+        const int SPREAD_ENEMY_SHOT_DAMAGE = 1000;
+        const int LARGE_ENEMY_SHOT_DAMAGE = 6000;
+
+        const int ENEMY_REGULAR_HEALTH = 6000;
+        const int ENEMY_SPREAD_HEALTH = 3000;
+        const int ENEMY_LARGE_HEALTH = 10000;
 
         const float PERCENT_TO_COLOR_CONVERSION = .392f;
         const float HALF_PERCENT_TO_COLOR_CONVERSION = .196f;
@@ -53,13 +67,16 @@ namespace phraktal
         const std::string DEFAULT_FONT = "assets/images/sample.ttf";
 
         const std::string BG_PNG = "assets/images/bg.png";
-        const std::string POWERBAR_PNG = "assets/images/powerbar.png";
         const std::string PLAYER_PNG = "assets/images/player.png";
         const std::string ENEMY_PNG = "assets/images/enemy.png";
-        const std::string PLAYER_BULLET_PNG = "assets/images/playerbullet.png";
+
+        const std::string REGULAR_PLAYER_BULLET_PNG = "assets/images/playerbullet.png";
         const std::string SPREAD_PLAYER_BULLET_PNG = "assets/images/spreadplayerbullet.png";
         const std::string LARGE_PLAYER_BULLET_PNG = "assets/images/largeplayerbullet.png";
-        const std::string ENEMY_BULLET_PNG = "assets/images/enemybullet.png";
+
+        const std::string REGULAR_ENEMY_BULLET_PNG = "assets/images/enemybullet.png";
+        const std::string SPREAD_ENEMY_BULLET_PNG = "assets/images/spreadenemybullet.png";
+        const std::string LARGE_ENEMY_BULLET_PNG = "assets/images/largeenemybullet.png";
 
         const std::string SPREAD_POWERUP_PNG = "assets/images/spreadpowerup.png";
         const std::string LARGE_BULLET_POWERUP_PNG = "assets/images/largebulletpowerup.png";
@@ -67,9 +84,9 @@ namespace phraktal
         const std::string COIN_PNG = "assets/images/coin.png";
         const std::string COIN_COUNT_GRAPHIC_PNG = "assets/images/coincountgraphic.png";
 
-        const std::string VOID_PNG = "assets/images/void.png";
-        const std::string GRASS_PNG = "assets/images/grass.png";
-        const std::string STONE_PNG = "assets/images/stone.png";
+//        const std::string VOID_PNG = "assets/images/void.png";
+//        const std::string GRASS_PNG = "assets/images/grass.png";
+//        const std::string STONE_PNG = "assets/images/stone.png";
     }
 
     namespace tiles

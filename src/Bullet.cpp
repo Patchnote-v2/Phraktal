@@ -45,18 +45,33 @@ void Bullet::update(float dTime)
 
 int Bullet::getDamage()
 {
-    switch (this->powerupType)
+    if (this->type == Type::PLAYER_BULLET)
     {
-        case Powerup::PowerupType::NONE:
-            return phraktal::levels::REGULAR_SHOT_DAMAGE;
+        switch (this->powerupType)
+        {
+            case Powerup::PowerupType::NONE:
+                return phraktal::levels::REGULAR_PLAYER_SHOT_DAMAGE;
 
-        case Powerup::PowerupType::SPREAD:
-            return phraktal::levels::SPREAD_SHOT_DAMAGE;
+            case Powerup::PowerupType::SPREAD:
+                return phraktal::levels::SPREAD_PLAYER_SHOT_DAMAGE;
 
-        case Powerup::PowerupType::LARGE:
-            return phraktal::levels::LARGE_SHOT_DAMAGE;
-
-        default:
-            return phraktal::levels::REGULAR_SHOT_DAMAGE;
+            case Powerup::PowerupType::LARGE:
+                return phraktal::levels::LARGE_PLAYER_SHOT_DAMAGE;
+        }
     }
+    else if (this->type == Type::ENEMY_BULLET)
+    {
+        switch (this->powerupType)
+        {
+            case Powerup::PowerupType::NONE:
+                return phraktal::levels::REGULAR_ENEMY_SHOT_DAMAGE;
+
+            case Powerup::PowerupType::SPREAD:
+                return phraktal::levels::SPREAD_ENEMY_SHOT_DAMAGE;
+
+            case Powerup::PowerupType::LARGE:
+                return phraktal::levels::LARGE_ENEMY_SHOT_DAMAGE;
+        }
+    }
+    return phraktal::levels::REGULAR_PLAYER_SHOT_DAMAGE;
 }

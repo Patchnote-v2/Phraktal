@@ -3,6 +3,8 @@
 
 #include <cstdlib>
 
+#include "SDL2/SDL.h"
+
 #include "MoveableEntity.h"
 #include "Player.h"
 #include "Bar.h"
@@ -10,11 +12,8 @@
 class Enemy : public MoveableEntity
 {
 public:
-    float shotCooldown;
-//    SDL_Rect* healthBarOutline;
-//    SDL_Rect* healthBarFilled;
 
-    Enemy(Camera &camera, int x, int y);
+    Enemy(Camera &camera, int x, int y, Powerup::PowerupType powerupType);
 
     void update(float dTime) override;
     void toggleActive();
@@ -27,9 +26,18 @@ public:
 
     std::unique_ptr< SDL_Color > getHealthColor() const;
 
+    Powerup::PowerupType getPowerupType() const;
+
+    void resetShotCooldown();
+    bool canFire() const;
+
 private:
+    Powerup::PowerupType powerupType;
     bool active;
     int health;
+    int maxHealth;
+    int shotCooldown;
+    int maxShotCooldownTime;
 
     std::shared_ptr< Bar > healthBar;
 

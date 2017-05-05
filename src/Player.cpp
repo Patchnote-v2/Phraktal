@@ -6,7 +6,7 @@ Player::Player(Camera &camera, int x, int y) :
         decelerationSpeed(0.70f),
         powerupType(Powerup::PowerupType::NONE),
         shotCooldown(0),
-        maxShotCooldownTime(phraktal::levels::REGULAR_SHOT_COOLDOWN),
+        maxShotCooldownTime(phraktal::levels::REGULAR_PLAYER_SHOT_COOLDOWN),
         numCoinsCollected(0)
 {
     this->type = Type::PLAYER;
@@ -151,19 +151,19 @@ void Player::setPowerupType(Powerup::PowerupType powerupType)
     {
         case Powerup::PowerupType::NONE:
         {
-            this->maxShotCooldownTime = phraktal::levels::REGULAR_SHOT_COOLDOWN;
+            this->maxShotCooldownTime = phraktal::levels::REGULAR_PLAYER_SHOT_COOLDOWN;
             break;
         }
 
         case Powerup::PowerupType::SPREAD:
         {
-            this->maxShotCooldownTime = phraktal::levels::SPREAD_SHOT_COOLDOWN;
+            this->maxShotCooldownTime = phraktal::levels::SPREAD_PLAYER_SHOT_COOLDOWN;
             break;
         }
 
         case Powerup::PowerupType::LARGE:
         {
-            this->maxShotCooldownTime = phraktal::levels::LARGE_SHOT_COOLDOWN;
+            this->maxShotCooldownTime = phraktal::levels::LARGE_PLAYER_SHOT_COOLDOWN;
             break;
         }
     }
@@ -177,7 +177,7 @@ Powerup::PowerupType Player::getPowerupType() const
 void Player::removePowerup()
 {
     this->powerupType = Powerup::PowerupType::NONE;
-    this->maxShotCooldownTime = phraktal::levels::REGULAR_SHOT_COOLDOWN;
+    this->maxShotCooldownTime = phraktal::levels::REGULAR_PLAYER_SHOT_COOLDOWN;
 }
 
 void Player::resetShotCooldown()

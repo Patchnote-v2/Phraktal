@@ -4,14 +4,17 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
-
+#include <sstream>
+#include <ctime>
 #include "Camera.h"
+
 #include "Text.h"
 #include "Entity.h"
 #include "Grid.h"
 #include "Player.h"
 #include "Enemy.h"
 #include "Bullet.h"
+#include "Coin.h"
 #include "Log.h"
 
 class Engine
@@ -52,10 +55,11 @@ public:
     std::string getStats() const;
 
 private:
+    bool shiftHeld;
     int enemiesKilled;
     int timesHit;
 
-    std::unique_ptr <SDL_Window, phraktal::utils::SDL_Deleter> window;
+    std::unique_ptr< SDL_Window, phraktal::utils::SDL_Deleter > window;
     std::shared_ptr< SDL_Renderer > renderer;
     Grid grid;
 
@@ -97,7 +101,7 @@ void Engine::initEntity(std::shared_ptr< T > entity, std::string textureName)
     }
     else if (type == Entity::Type::BACKGROUND_ENTITY)
     {
-        entity->aim.x = entity->center.x;
+//        entity->aim.x = entity->center.x;
         return;
     }
 

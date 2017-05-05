@@ -1,6 +1,3 @@
-#include <sstream>
-#include <ctime>
-#include <Coin.h>
 #include "Engine.h"
 
 /*
@@ -9,6 +6,7 @@
 
 Engine::Engine() :
         camera(0, 0, phraktal::levels::SCREEN_WIDTH, phraktal::levels::SCREEN_HEIGHT),
+        shiftHeld(true),
         enemiesKilled(0),
         timesHit(0),
         grid(phraktal::levels::LEVEL_WIDTH, phraktal::levels::LEVEL_HEIGHT, phraktal::levels::TILE_SIZE)
@@ -146,10 +144,10 @@ void Engine::handleEvents(SDL_Event& e)
                     {
                         auto singleBullet = std::make_shared< Bullet >(this->camera, (int) player->getCenter().x,
                                                                        (int) player->getCenter().y,
-                                                                       phraktal::levels::MAX_REGULAR_SHOT_SPEED,
+                                                                       phraktal::levels::MAX_PLAYER_REGULAR_SHOT_SPEED,
                                                                        Entity::Type::PLAYER_BULLET,
                                                                       Powerup::PowerupType::NONE);
-                        this->initEntity(singleBullet, phraktal::assets::PLAYER_BULLET_PNG);
+                        this->initEntity(singleBullet, phraktal::assets::REGULAR_PLAYER_BULLET_PNG);
                         singleBullet->setDestination(x, y);
                         break;
                     }
@@ -158,17 +156,17 @@ void Engine::handleEvents(SDL_Event& e)
                     {
                         auto bullet1 = std::make_shared< Bullet >(this->camera, (int) player->getCenter().x,
                                                                   (int) player->getCenter().y,
-                                                                  phraktal::levels::MAX_SPREAD_SHOT_SPEED,
+                                                                  phraktal::levels::MAX_PLAYER_SPREAD_SHOT_SPEED,
                                                                   Entity::Type::PLAYER_BULLET,
                                                                   Powerup::PowerupType::SPREAD);
                         auto bullet2 = std::make_shared< Bullet >(this->camera, (int) player->getCenter().x,
                                                                   (int) player->getCenter().y,
-                                                                  phraktal::levels::MAX_SPREAD_SHOT_SPEED,
+                                                                  phraktal::levels::MAX_PLAYER_SPREAD_SHOT_SPEED,
                                                                   Entity::Type::PLAYER_BULLET,
                                                                   Powerup::PowerupType::SPREAD);
                         auto bullet3 = std::make_shared< Bullet >(this->camera, (int) player->getCenter().x,
                                                                   (int) player->getCenter().y,
-                                                                  phraktal::levels::MAX_SPREAD_SHOT_SPEED,
+                                                                  phraktal::levels::MAX_PLAYER_SPREAD_SHOT_SPEED,
                                                                   Entity::Type::PLAYER_BULLET,
                                                                   Powerup::PowerupType::SPREAD);
                         this->initEntity(bullet1, phraktal::assets::SPREAD_PLAYER_BULLET_PNG);
@@ -184,7 +182,7 @@ void Engine::handleEvents(SDL_Event& e)
                     {
                         auto largeBullet = std::make_shared< Bullet >(this->camera, (int) player->getCenter().x,
                                                                       (int) player->getCenter().y,
-                                                                      phraktal::levels::MAX_LARGE_SHOT_SPEED,
+                                                                      phraktal::levels::MAX_PLAYER_LARGE_SHOT_SPEED,
                                                                       Entity::Type::PLAYER_BULLET,
                                                                       Powerup::PowerupType::LARGE);
                         this->initEntity(largeBullet, phraktal::assets::LARGE_PLAYER_BULLET_PNG);
@@ -200,16 +198,9 @@ void Engine::handleEvents(SDL_Event& e)
     }
     if (e.type == SDL_KEYDOWN)
     {
-        if (e.key.keysym.sym == SDLK_q)
+        if (e.key.keysym.sym == SDLK_LSHIFT || e.key.keysym.sym == SDLK_RSHIFT)
         {
-
-            int x, y;
-            SDL_GetMouseState(&x, &y);
-            auto enemy = std::make_shared< Enemy >(this->camera, x + (int) this->camera.pos.x, y + (int) this->camera.pos.y);
-            this->initEntity(enemy, phraktal::assets::ENEMY_PNG);
-            enemy->setMaxSpeed(phraktal::levels::MAX_ENEMY_SPEED);
-            enemy->setCurrentTarget(player);
-            enemy->toggleActive();
+            this->shiftHeld = true;
         }
         if (e.key.keysym.sym == SDLK_c)
         {
@@ -225,36 +216,84 @@ void Engine::handleEvents(SDL_Event& e)
         if (e.key.keysym.sym == SDLK_o)
         {
             // Reserved for debugging
+            /*
             std::srand((uint) std::time(0));
             int x = (std::rand() % phraktal::levels::SCREEN_WIDTH);
             int y = (std::rand() % phraktal::levels::SCREEN_HEIGHT);
-            auto enemy = std::make_shared< Enemy >(this->camera, x, y);
+            auto enemy = std::make_shared< Enemy >(this->camera, x, y, Powerup::PowerupType::NONE);
             this->initEntity(enemy, phraktal::assets::ENEMY_PNG);
-            enemy->setMaxSpeed(phraktal::levels::MAX_ENEMY_SPEED);
+            enemy->setMaxSpeed(phraktal::levels::MAX_REGULAR_ENEMY_SPEED);
             enemy->setCurrentTarget(player);
             enemy->toggleActive();
+             */
         }
         if (e.key.keysym.sym == SDLK_1)
         {
-            // Spread powerup
-            int x, y;
-            SDL_GetMouseState(&x, &y);
-            auto powerup = std::make_shared< Powerup >(this->camera, x + (int) this->camera.pos.x,
-                                                       y + (int) this->camera.pos.y, Powerup::PowerupType::SPREAD);
-            this->initEntity(powerup, phraktal::assets::SPREAD_POWERUP_PNG);
+            if (!this->shiftHeld)
+            {
+                this->player->removePowerup();
+            }
+            else
+            {
+                int x, y;
+                SDL_GetMouseState(&x, &y);
+                auto enemy = std::make_shared< Enemy >(this->camera, x + (int) this->camera.pos.x, y + (int) this->camera.pos.y, Powerup::PowerupType::NONE);
+                this->initEntity(enemy, phraktal::assets::ENEMY_PNG);
+                enemy->setMaxSpeed(phraktal::levels::MAX_REGULAR_ENEMY_SPEED);
+                enemy->setCurrentTarget(player);
+                enemy->toggleActive();
+            }
         }
         if (e.key.keysym.sym == SDLK_2)
         {
-            // Large bullet powerup
-            int x, y;
-            SDL_GetMouseState(&x, &y);
-            auto powerup = std::make_shared< Powerup >(this->camera, x + (int) this->camera.pos.x,
-                                                      y + (int) this->camera.pos.y, Powerup::PowerupType::LARGE);
-            this->initEntity(powerup, phraktal::assets::LARGE_BULLET_POWERUP_PNG);
+            if (!this->shiftHeld)
+            {
+                // Spread powerup
+                int x, y;
+                SDL_GetMouseState(&x, &y);
+                auto powerup = std::make_shared< Powerup >(this->camera, x + (int) this->camera.pos.x,
+                                                           y + (int) this->camera.pos.y, Powerup::PowerupType::SPREAD);
+                this->initEntity(powerup, phraktal::assets::SPREAD_POWERUP_PNG);
+            }
+            else
+            {
+                int x, y;
+                SDL_GetMouseState(&x, &y);
+                auto enemy = std::make_shared< Enemy >(this->camera, x + (int) this->camera.pos.x, y + (int) this->camera.pos.y, Powerup::PowerupType::SPREAD);
+                this->initEntity(enemy, phraktal::assets::ENEMY_PNG);
+                enemy->setMaxSpeed(phraktal::levels::MAX_SPREAD_ENEMY_SPEED);
+                enemy->setCurrentTarget(player);
+                enemy->toggleActive();
+            }
         }
         if (e.key.keysym.sym == SDLK_3)
         {
-            this->player->removePowerup();
+            if (!this->shiftHeld)
+            {
+                // Large bullet powerup
+                int x, y;
+                SDL_GetMouseState(&x, &y);
+                auto powerup = std::make_shared< Powerup >(this->camera, x + (int) this->camera.pos.x,
+                                                           y + (int) this->camera.pos.y, Powerup::PowerupType::LARGE);
+                this->initEntity(powerup, phraktal::assets::LARGE_BULLET_POWERUP_PNG);
+            }
+            else
+            {
+                int x, y;
+                SDL_GetMouseState(&x, &y);
+                auto enemy = std::make_shared< Enemy >(this->camera, x + (int) this->camera.pos.x, y + (int) this->camera.pos.y, Powerup::PowerupType::LARGE);
+                this->initEntity(enemy, phraktal::assets::ENEMY_PNG);
+                enemy->setMaxSpeed(phraktal::levels::MAX_LARGE_ENEMY_SPEED);
+                enemy->setCurrentTarget(player);
+                enemy->toggleActive();
+            }
+        }
+    }
+    if (e.type == SDL_KEYUP)
+    {
+        if (e.key.keysym.sym == SDLK_LSHIFT || e.key.keysym.sym == SDLK_RSHIFT)
+        {
+            this->shiftHeld = false;
         }
     }
 }
@@ -269,17 +308,67 @@ void Engine::updateEntities(float dTime)
         if (entity->getType() == Entity::Type::ENEMY)
         {
             auto derived = std::dynamic_pointer_cast< Enemy >(entity);
-            if ((int) derived->shotCooldown > 3)
+            if (derived->canFire())
             {
-                auto bullet = std::make_shared< Bullet >(camera, (int) derived->getCenter().x,
-                                                         (int) derived->getCenter().y, 200, Entity::Type::ENEMY_BULLET, Powerup::PowerupType::NONE);
-                this->initEntity(bullet, phraktal::assets::ENEMY_BULLET_PNG);
-                bullet->setDestination((int) this->player->getCenter().x, (int) this->player->getCenter().y);
+                Vector2 playerPos = this->player->getCenter();
+                switch (derived->getPowerupType())
+                {
+                    case Powerup::PowerupType::NONE:
+                    {
+                        // Regular enemy
+                        auto singleBullet = std::make_shared< Bullet >(this->camera, (int) derived->getCenter().x,
+                                                                       (int) derived->getCenter().y,
+                                                                       phraktal::levels::MAX_ENEMY_REGULAR_SHOT_SPEED,
+                                                                       Entity::Type::ENEMY_BULLET,
+                                                                       Powerup::PowerupType::NONE);
+                        this->initEntity(singleBullet, phraktal::assets::REGULAR_ENEMY_BULLET_PNG);
+                        singleBullet->setDestination((int) playerPos.x, (int) playerPos.y);
+                        break;
+                    }
 
-                derived->shotCooldown = 0;
+                    case Powerup::PowerupType::SPREAD:
+                    {
+                        // Spread shot enemy
+                        auto bullet1 = std::make_shared< Bullet >(this->camera, (int) derived->getCenter().x,
+                                                                  (int) derived->getCenter().y,
+                                                                  phraktal::levels::MAX_ENEMY_SPREAD_SHOT_SPEED,
+                                                                  Entity::Type::ENEMY_BULLET,
+                                                                  Powerup::PowerupType::SPREAD);
+                        auto bullet2 = std::make_shared< Bullet >(this->camera, (int) derived->getCenter().x,
+                                                                  (int) derived->getCenter().y,
+                                                                  phraktal::levels::MAX_ENEMY_SPREAD_SHOT_SPEED,
+                                                                  Entity::Type::ENEMY_BULLET,
+                                                                  Powerup::PowerupType::SPREAD);
+                        auto bullet3 = std::make_shared< Bullet >(this->camera, (int) derived->getCenter().x,
+                                                                  (int) derived->getCenter().y,
+                                                                  phraktal::levels::MAX_ENEMY_SPREAD_SHOT_SPEED,
+                                                                  Entity::Type::ENEMY_BULLET,
+                                                                  Powerup::PowerupType::SPREAD);
+                        this->initEntity(bullet1, phraktal::assets::SPREAD_ENEMY_BULLET_PNG);
+                        this->initEntity(bullet2, phraktal::assets::SPREAD_ENEMY_BULLET_PNG);
+                        this->initEntity(bullet3, phraktal::assets::SPREAD_ENEMY_BULLET_PNG);
+                        bullet1->setVelocityFromAngle(derived->getAngle());
+                        bullet2->setVelocityFromAngle(derived->getAngle() - 5);
+                        bullet3->setVelocityFromAngle(derived->getAngle() + 5);
+                        break;
+                    }
 
-                this->bullets.push_back(bullet);
-                this->grid.addEntity(bullet);
+                    case Powerup::PowerupType::LARGE:
+                    {
+                        // Large shot enemy
+                        auto largeBullet = std::make_shared< Bullet >(this->camera, (int) derived->getCenter().x,
+                                                                      (int) derived->getCenter().y,
+                                                                      phraktal::levels::MAX_ENEMY_LARGE_SHOT_SPEED,
+                                                                      Entity::Type::ENEMY_BULLET,
+                                                                      Powerup::PowerupType::LARGE);
+                        this->initEntity(largeBullet, phraktal::assets::LARGE_ENEMY_BULLET_PNG);
+                        largeBullet->setDestination((int) playerPos.x, (int) playerPos.y);
+
+                        break;
+                    }
+                }
+
+                derived->resetShotCooldown();
             }
         }
     }
@@ -487,8 +576,6 @@ void Engine::renderBar(std::shared_ptr< Bar > bar)
 {
     SDL_RenderDrawRect(this->renderer.get(), bar->barOutline.get());
     SDL_RenderFillRect(this->renderer.get(), bar->filled.get());
-//    this->renderRectangleOutline(bar->barOutline);
-//    this->renderRectangleFilled(bar->filled);
 }
 
 std::string Engine::getStats() const
