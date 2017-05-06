@@ -6,7 +6,7 @@
 
 Engine::Engine() :
         camera(0, 0, phraktal::levels::SCREEN_WIDTH, phraktal::levels::SCREEN_HEIGHT),
-        shiftHeld(true),
+        shiftHeld(false),
         enemiesKilled(0),
         timesHit(0),
         grid(phraktal::levels::LEVEL_WIDTH, phraktal::levels::LEVEL_HEIGHT, phraktal::levels::TILE_SIZE)
@@ -221,7 +221,7 @@ void Engine::handleEvents(SDL_Event& e)
             int x = (std::rand() % phraktal::levels::SCREEN_WIDTH);
             int y = (std::rand() % phraktal::levels::SCREEN_HEIGHT);
             auto enemy = std::make_shared< Enemy >(this->camera, x, y, Powerup::PowerupType::NONE);
-            this->initEntity(enemy, phraktal::assets::ENEMY_PNG);
+            this->initEntity(enemy, phraktal::assets::REGULAR_ENEMY_PNG);
             enemy->setMaxSpeed(phraktal::levels::MAX_REGULAR_ENEMY_SPEED);
             enemy->setCurrentTarget(player);
             enemy->toggleActive();
@@ -238,7 +238,7 @@ void Engine::handleEvents(SDL_Event& e)
                 int x, y;
                 SDL_GetMouseState(&x, &y);
                 auto enemy = std::make_shared< Enemy >(this->camera, x + (int) this->camera.pos.x, y + (int) this->camera.pos.y, Powerup::PowerupType::NONE);
-                this->initEntity(enemy, phraktal::assets::ENEMY_PNG);
+                this->initEntity(enemy, phraktal::assets::REGULAR_ENEMY_PNG);
                 enemy->setMaxSpeed(phraktal::levels::MAX_REGULAR_ENEMY_SPEED);
                 enemy->setCurrentTarget(player);
                 enemy->toggleActive();
@@ -260,7 +260,7 @@ void Engine::handleEvents(SDL_Event& e)
                 int x, y;
                 SDL_GetMouseState(&x, &y);
                 auto enemy = std::make_shared< Enemy >(this->camera, x + (int) this->camera.pos.x, y + (int) this->camera.pos.y, Powerup::PowerupType::SPREAD);
-                this->initEntity(enemy, phraktal::assets::ENEMY_PNG);
+                this->initEntity(enemy, phraktal::assets::SPREAD_ENEMY_PNG);
                 enemy->setMaxSpeed(phraktal::levels::MAX_SPREAD_ENEMY_SPEED);
                 enemy->setCurrentTarget(player);
                 enemy->toggleActive();
@@ -282,7 +282,7 @@ void Engine::handleEvents(SDL_Event& e)
                 int x, y;
                 SDL_GetMouseState(&x, &y);
                 auto enemy = std::make_shared< Enemy >(this->camera, x + (int) this->camera.pos.x, y + (int) this->camera.pos.y, Powerup::PowerupType::LARGE);
-                this->initEntity(enemy, phraktal::assets::ENEMY_PNG);
+                this->initEntity(enemy, phraktal::assets::LARGE_ENEMY_PNG);
                 enemy->setMaxSpeed(phraktal::levels::MAX_LARGE_ENEMY_SPEED);
                 enemy->setCurrentTarget(player);
                 enemy->toggleActive();
@@ -348,8 +348,8 @@ void Engine::updateEntities(float dTime)
                         this->initEntity(bullet2, phraktal::assets::SPREAD_ENEMY_BULLET_PNG);
                         this->initEntity(bullet3, phraktal::assets::SPREAD_ENEMY_BULLET_PNG);
                         bullet1->setVelocityFromAngle(derived->getAngle());
-                        bullet2->setVelocityFromAngle(derived->getAngle() - 5);
-                        bullet3->setVelocityFromAngle(derived->getAngle() + 5);
+                        bullet2->setVelocityFromAngle(derived->getAngle() - 15);
+                        bullet3->setVelocityFromAngle(derived->getAngle() + 15);
                         break;
                     }
 

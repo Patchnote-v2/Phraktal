@@ -59,7 +59,7 @@ namespace phraktal
         const float PERCENT_TO_COLOR_CONVERSION = .392f;
         const float HALF_PERCENT_TO_COLOR_CONVERSION = .196f;
 
-        const std::string LEVEL1_TXT = "assets/levels/level1.txt";
+        const std::string ONE_TXT = "assets/levels/UpgradeMenu.json";
     }
 
     namespace assets
@@ -68,7 +68,10 @@ namespace phraktal
 
         const std::string BG_PNG = "assets/images/bg.png";
         const std::string PLAYER_PNG = "assets/images/player.png";
-        const std::string ENEMY_PNG = "assets/images/enemy.png";
+
+        const std::string REGULAR_ENEMY_PNG = "assets/images/enemy.png";
+        const std::string SPREAD_ENEMY_PNG = "assets/images/spreadenemy.png";
+        const std::string LARGE_ENEMY_PNG = "assets/images/largeenemy.png";
 
         const std::string REGULAR_PLAYER_BULLET_PNG = "assets/images/playerbullet.png";
         const std::string SPREAD_PLAYER_BULLET_PNG = "assets/images/spreadplayerbullet.png";
