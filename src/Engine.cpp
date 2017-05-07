@@ -194,6 +194,10 @@ void Engine::handleEvents(SDL_Event& e)
 
                 this->player->resetShotCooldown();
             }
+            else
+            {
+                this->player->penalizePlayerCooldown(phraktal::levels::DEFAULT_PLAYER_COOLDOWN_PENALTY);
+            }
         }
     }
     if (e.type == SDL_KEYDOWN)

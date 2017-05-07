@@ -16,17 +16,17 @@ namespace phraktal
         const Uint32 SCREEN_TICKS_PER_FRAME = 1000 / SCREEN_FPS;
 
         // Level numbers
-        const int LEVEL_WIDTH = 1920;
-        const int LEVEL_HEIGHT = 1080;
-        const int SCREEN_WIDTH = 1280;
-        const int SCREEN_HEIGHT = 720;
+        const int LEVEL_WIDTH = 2000;
+        const int LEVEL_HEIGHT = 2000;
+        const int SCREEN_WIDTH = 1500;
+        const int SCREEN_HEIGHT = 1000;
         const int TILE_SIZE = 100;
 
         const int DEFAULT_FONT_SIZE = 18;
 
-        const int MAX_REGULAR_ENEMY_SPEED = 100;
-        const int MAX_SPREAD_ENEMY_SPEED = 75;
-        const int MAX_LARGE_ENEMY_SPEED = 50;
+        const int MAX_REGULAR_ENEMY_SPEED = 50;
+        const int MAX_SPREAD_ENEMY_SPEED = 50;
+        const int MAX_LARGE_ENEMY_SPEED = 25;
 
         const int MAX_PLAYER_REGULAR_SHOT_SPEED = 1000;
         const int MAX_PLAYER_SPREAD_SHOT_SPEED = 2000;
@@ -55,6 +55,8 @@ namespace phraktal
         const int ENEMY_REGULAR_HEALTH = 6000;
         const int ENEMY_SPREAD_HEALTH = 3000;
         const int ENEMY_LARGE_HEALTH = 10000;
+
+        const int DEFAULT_PLAYER_COOLDOWN_PENALTY = 150;
 
         const float PERCENT_TO_COLOR_CONVERSION = .392f;
         const float HALF_PERCENT_TO_COLOR_CONVERSION = .196f;

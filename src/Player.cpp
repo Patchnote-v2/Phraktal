@@ -134,9 +134,13 @@ void Player::update(float dTime)
     }
 
     // Shot cooldown
-    if (this->shotCooldown < this->maxShotCooldownTime)
+    if (this->shotCooldown < this->maxShotCooldownTime && this->shotCooldown >= 0)
     {
         this->shotCooldown += dTime * 1000;
+    }
+    else if (this->shotCooldown < 0 )
+    {
+        this->shotCooldown = 0;
     }
     if (this->shotCooldown > this->maxShotCooldownTime)
     {
@@ -237,4 +241,9 @@ void Player::resetCoins()
 int Player::getCoinCount() const
 {
     return this->numCoinsCollected;
+}
+
+void Player::penalizePlayerCooldown(int penaltyAmount)
+{
+    this->shotCooldown -= penaltyAmount;
 }

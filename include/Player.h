@@ -37,6 +37,8 @@ public:
     void resetCoins();
     int getCoinCount() const;
 
+    void penalizePlayerCooldown(int penaltyAmount);
+
 private:
     float accelerationSpeed;
     float decelerationSpeed;
